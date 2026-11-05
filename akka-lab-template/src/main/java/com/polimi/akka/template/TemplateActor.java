@@ -3,89 +3,94 @@ package com.polimi.akka.template;
 import akka.actor.AbstractActor;
 import akka.actor.Props;
 
+import java.util.Optional;
+
 /**
- * Basic template actor following the structure presented in the course slides
- * ("Create actors" and "Actors basics").
+ * EXAM TEMPLATE 1: Standard Actor (AbstractActor)
  * <p>
- * An actor is defined by inheriting from {@link AbstractActor} and implementing
- * {@link #createReceive()}, which declares how each message type is processed.
- * Messages are processed atomically: the whole handler runs as if it were a
- * {@code synchronized} method of a class whose methods are all synchronized, and
- * messages received in the meantime are queued in the mailbox without affecting
- * the handler that is currently running.
- * </p>
- * <p>
- * The lifecycle hooks {@link #preStart()} and {@link #postStop()} are overridden to
- * show where custom logic can be placed when the actor enters different lifecycle states.
+ * Demonstrates:
+ * - Private mutable state (thread-safe without locks due to atomic message processing)
+ * - Class-based matching and Predicate-based matching in {@link #createReceive()}
+ * - Replying to the sender via {@code sender().tell(reply, self())}
+ * - Lifecycle hooks: {@code preStart()}, {@code preRestart()}, {@code postRestart()}, {@code postStop()}
+ * - Static {@code props()} factory methods (with and without constructor parameters)
  * </p>
  */
 public class TemplateActor extends AbstractActor {
 
-    /**
-     * Creates a new TemplateActor. Actors are never instantiated with {@code new}
-     * by user code: Akka calls this constructor when {@code actorOf(props)} is invoked.
-     */
+    private int counter = 0;
+    private final String actorTag;
+
+    // Default constructor
     public TemplateActor() {
-        // No state to initialize in the template actor
+        this.actorTag = "default";
     }
 
-    /**
-     * Defines the receive behavior of the actor.
-     * <p>
-     * When a message arrives, the match clauses are checked in the order in which they
-     * are defined and the handler of the first matching clause is executed.
-     * If no clause matches, the message is discarded.
-     * </p>
-     *
-     * @return the Receive object containing the match clauses
-     */
+    // Parameterized constructor (use when passing initial config or ActorRefs at creation)
+    public TemplateActor(String actorTag) {
+        this.actorTag = actorTag;
+    }
+
     @Override
     public Receive createReceive() {
-        // Build the behavior with a single clause matching TemplateMessage
+        // Clauses are evaluated top-to-bottom; the FIRST matching clause is executed.
+        // Unmatched messages are silently discarded unless .matchAny(...) is added.
         return receiveBuilder()
+                // 1. Match with a boolean predicate (selector)
+                .match(TemplateMessage.class, msg -> msg.getCode() < 0, this::onNegativeCodeMessage)
+                // 2. Match by message class
                 .match(TemplateMessage.class, this::onMessage)
+                // 3. Optional catch-all for unexpected messages
+                .matchAny(msg -> System.out.println("[" + actorTag + "] Ignored unknown message: " + msg))
                 .build();
     }
 
-    /**
-     * Handles a {@link TemplateMessage}. The method runs atomically with respect to
-     * any other message delivered to this actor.
-     *
-     * @param msg the immutable message received from the mailbox
-     */
-    void onMessage(TemplateMessage msg) {
-        // Print the content of the received message
-        System.out.println("[TemplateActor] Received: " + msg.getContent());
+    private void onMessage(TemplateMessage msg) {
+        ++counter;
+        System.out.println("[" + actorTag + "] Received: " + msg.getContent() + " | counter = " + counter);
+
+        // If the sender is a real actor (not ActorRef.noSender()), send a reply
+        if (!sender().equals(getContext().getSystem().deadLetters())) {
+            sender().tell(new TemplateMessage("ACK #" + counter, counter), self());
+        }
     }
 
-    /**
-     * Lifecycle hook invoked by Akka after the actor instance is created and before
-     * it processes its first message.
-     */
+    private void onNegativeCodeMessage(TemplateMessage msg) {
+        System.out.println("[" + actorTag + "] Special handler for negative code: " + msg.getCode());
+    }
+
+    // --- Lifecycle Hooks ---
+
     @Override
     public void preStart() {
-        // Notify that the actor has started
-        System.out.println("[TemplateActor] preStart(): actor started at " + self().path());
+        System.out.println("[" + actorTag + "] preStart() at " + self().path());
     }
 
-    /**
-     * Lifecycle hook invoked by Akka after the actor has been stopped
-     * (for example when the ActorSystem terminates).
-     */
+    @Override
+    public void preRestart(Throwable reason, Optional<Object> message) {
+        // Called on the OLD instance before restart
+        System.out.println("[" + actorTag + "] preRestart() due to: " + reason.getMessage());
+    }
+
+    @Override
+    public void postRestart(Throwable reason) {
+        // Called on the NEW instance after restart
+        System.out.println("[" + actorTag + "] postRestart() completed");
+    }
+
     @Override
     public void postStop() {
-        // Notify that the actor has stopped
-        System.out.println("[TemplateActor] postStop(): actor stopped");
+        System.out.println("[" + actorTag + "] postStop()");
     }
 
-    /**
-     * Factory method returning the Props (the "property object" that defines the class
-     * of the actor) used by {@code actorOf()} to create a new TemplateActor.
-     *
-     * @return Props for TemplateActor
-     */
-    static Props props() {
-        // Same form used in the slides: Props.create(ActorClass.class)
+    // --- Props Factories ---
+
+    public static Props props() {
         return Props.create(TemplateActor.class);
     }
+
+    public static Props props(String actorTag) {
+        return Props.create(TemplateActor.class, () -> new TemplateActor(actorTag));
+    }
 }
+

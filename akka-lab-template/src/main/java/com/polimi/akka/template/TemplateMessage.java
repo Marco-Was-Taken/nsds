@@ -3,51 +3,41 @@ package com.polimi.akka.template;
 import java.io.Serializable;
 
 /**
- * Immutable and serializable message class representing a generic data payload
- * exchanged between Akka actors.
+ * EXAM TEMPLATE: Immutable and Serializable Message
  * <p>
- * In the Akka Actor Model, messages MUST be immutable to prevent shared-memory
- * concurrency issues between sender and receiver. Because messages cannot be modified
- * once created, multiple actors or threads can safely read message contents without
- * any need for synchronization or defensive copying.
+ * Rules for Akka messages:
+ * 1. All fields MUST be {@code private final} (immutable).
+ * 2. Collections or arrays passed in should be defensively copied or wrapped with {@code List.copyOf(...)}.
+ * 3. Implement {@link Serializable} for remote/cluster compatibility.
  * </p>
  */
 public class TemplateMessage implements Serializable {
 
-    // Version UID to guarantee serialization compatibility across JVM instances
     private static final long serialVersionUID = 1L;
 
-    // The textual payload of the message, declared final to enforce immutability
     private final String content;
+    private final int code;
 
-    /**
-     * Constructs a new immutable TemplateMessage instance.
-     *
-     * @param content the string payload carried by this message
-     */
     public TemplateMessage(String content) {
-        // Assign the payload to the final field ensuring safe publication across threads
-        this.content = content;
+        this(content, 0);
     }
 
-    /**
-     * Retrieves the immutable content payload of this message.
-     *
-     * @return the string content payload
-     */
+    public TemplateMessage(String content, int code) {
+        this.content = content;
+        this.code = code;
+    }
+
     public String getContent() {
-        // Return the payload reference directly because String is immutable in Java
         return this.content;
     }
 
-    /**
-     * Returns a string representation of this message for logging and debugging purposes.
-     *
-     * @return a formatted string displaying the message payload
-     */
+    public int getCode() {
+        return this.code;
+    }
+
     @Override
     public String toString() {
-        // Return human-readable representation of this message instance
-        return "TemplateMessage{content='" + content + "'}";
+        return "TemplateMessage{content='" + content + "', code=" + code + "}";
     }
 }
+

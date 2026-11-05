@@ -2,44 +2,58 @@ package com.polimi.akka.template;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.pattern.Patterns;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Entry point of the template project.
- * <p>
- * It follows the steps shown in the slides ("Create actors" / "Send messages to actors"):
- * <ol>
- *   <li>instantiate an {@link ActorSystem};</li>
- *   <li>create an actor from its Props with {@code sys.actorOf(props, name)}, obtaining an {@link ActorRef};</li>
- *   <li>send an asynchronous message with {@code tell()};</li>
- *   <li>wait (here: until ENTER is pressed) and terminate the system.</li>
- * </ol>
- * </p>
+ * EXAM TEMPLATE: Main Bootstrapper (tell, ExecutorService, and Ask)
  */
 public class MainTemplate {
 
-    /**
-     * Starts the local actor system, sends one message and terminates the system.
-     *
-     * @param args command-line arguments (not used)
-     * @throws IOException if reading from standard input fails
-     */
+    private static final int NUM_THREADS = 16;
+    private static final int NUM_MESSAGES = 10;
+    private static final long TIMEOUT_MS = 5000;
+
     public static void main(String[] args) throws IOException {
-        // Instantiate the local ActorSystem
-        final ActorSystem sys = ActorSystem.create("LocalTemplateSystem");
+        // 1. Instantiate the ActorSystem
+        final ActorSystem sys = ActorSystem.create("System");
 
-        // Create the actor; actorOf returns an ActorRef that stays valid for the actor's whole lifecycle
-        final ActorRef templateActor = sys.actorOf(TemplateActor.props(), "templateActor");
+        // 2. Create an actor using its Props factory method
+        final ActorRef actor = sys.actorOf(TemplateActor.props("worker-1"), "templateActor");
 
-        // Asynchronous, fire-and-forget send: no sender because no reply is expected
-        templateActor.tell(new TemplateMessage("Hello Akka Classic!"), ActorRef.noSender());
+        // 3. Fire-and-forget asynchronous send (no reply expected -> ActorRef.noSender())
+        actor.tell(new TemplateMessage("Single async message", 0), ActorRef.noSender());
+        actor.tell(new TemplateMessage("Negative code message", -1), ActorRef.noSender());
 
-        // Wait for the message to be processed before terminating (same approach as the slides)
-        System.out.println("[MainTemplate] Press ENTER to terminate the system...");
+        // 4. Multi-threaded stress test (Lecture 1 pattern)
+        final ExecutorService exec = Executors.newFixedThreadPool(NUM_THREADS);
+        for (int i = 0; i < NUM_MESSAGES; i++) {
+            final int idx = i;
+            exec.submit(() -> actor.tell(new TemplateMessage("Parallel msg #" + idx, idx), ActorRef.noSender()));
+        }
+
+        // 5. Synchronous request-reply from main using Patterns.ask + Await.result (Lecture 2/3 pattern)
+        try {
+            Future<Object> future = Patterns.ask(actor, new TemplateMessage("Sync request"), TIMEOUT_MS);
+            TemplateMessage reply = (TemplateMessage) Await.result(future, Duration.create(5, TimeUnit.SECONDS));
+            System.out.println("[MainTemplate] Received synchronous reply: " + reply);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("[MainTemplate] Press ENTER to terminate...");
         System.in.read();
 
-        // Terminate the ActorSystem: all actors are stopped (postStop() is invoked)
+        // 6. Clean shutdown
+        exec.shutdown();
         sys.terminate();
     }
 }
+
