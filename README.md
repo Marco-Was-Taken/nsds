@@ -1,8 +1,9 @@
 # NSDS Akka Classic
 
-This repository contains two Maven projects for **Networked Software for Distributed Systems (NSDS)** at **Politecnico di Milano**:
+This repository contains three Maven projects for **Networked Software for Distributed Systems (NSDS)** at **Politecnico di Milano**:
 1. **`akka-lab-template/`**: Base project template for Akka Classic (`akka-actor_2.13`) applications.
-2. **`lab1-solutions/`**: Solutions for Lab 1 exercises.
+2. **`lab1-solutions/`**: Solutions for Lab 1 exercises (Exercises 1, 2, 3).
+3. **`lab2-solutions/`**: Solutions for Lab 2 exercises (Exercises 4, 5, 6).
 
 ---
 
@@ -27,36 +28,65 @@ nsds-akka-local/
 │           ├── RequestReplyTemplate.java
 │           ├── SupervisionTemplate.java
 │           └── RemoteDistributionTemplate.java
-└── lab1-solutions/
+├── lab1-solutions/
+│   ├── pom.xml
+│   └── src/main/java/com/polimi/nsds/akka/
+│       ├── base/
+│       │   ├── SimpleMessage.java
+│       │   ├── CounterActor.java
+│       │   └── Counter.java
+│       ├── ex1/
+│       │   ├── classes/
+│       │   │   ├── IncrementMsg.java
+│       │   │   ├── DecrementMsg.java
+│       │   │   ├── CounterActor.java
+│       │   │   └── Counter.java
+│       │   └── selectors/
+│       │       ├── CounterMsg.java
+│       │       ├── CounterActor.java
+│       │       └── Counter.java
+│       ├── ex2/
+│       │   ├── IncrementMsg.java
+│       │   ├── DecrementMsg.java
+│       │   ├── CounterActor.java
+│       │   └── CounterEx2.java
+│       └── ex3/
+│           ├── PutMsg.java
+│           ├── GetMsg.java
+│           ├── ReplyMsg.java
+│           ├── ServerActor.java
+│           ├── ClientActor.java
+│           ├── ClientAskActor.java
+│           └── ContactListApp.java
+└── lab2-solutions/
     ├── pom.xml
     └── src/main/java/com/polimi/nsds/akka/
-        ├── base/
-        │   ├── SimpleMessage.java
-        │   ├── CounterActor.java
-        │   └── Counter.java
-        ├── ex1/
-        │   ├── classes/
-        │   │   ├── IncrementMsg.java
-        │   │   ├── DecrementMsg.java
-        │   │   ├── CounterActor.java
-        │   │   └── Counter.java
-        │   └── selectors/
-        │       ├── CounterMsg.java
-        │       ├── CounterActor.java
-        │       └── Counter.java
-        ├── ex2/
-        │   ├── IncrementMsg.java
-        │   ├── DecrementMsg.java
-        │   ├── CounterActor.java
-        │   └── CounterEx2.java
-        └── ex3/
-            ├── PutMsg.java
-            ├── GetMsg.java
-            ├── ReplyMsg.java
+        ├── ex4/
+        │   ├── Message.java
+        │   ├── TextMessage.java
+        │   ├── SleepMessage.java
+        │   ├── WakeupMessage.java
+        │   ├── ConfigurationMessage.java
+        │   ├── ServerActor.java
+        │   ├── ClientActor.java
+        │   └── ContactListApp.java
+        ├── ex5/
+        │   ├── PutMsg.java
+        │   ├── GetMsg.java
+        │   ├── ReplyMsg.java
+        │   ├── ServerActor.java
+        │   ├── SupervisorActor.java
+        │   ├── ClientActor.java
+        │   └── ContactListApp.java
+        └── ex6/
+            ├── Message.java
+            ├── TextMessage.java
+            ├── ConfigurationMessage.java
+            ├── ReadyMessage.java
+            ├── UpperTextReply.java
             ├── ServerActor.java
             ├── ClientActor.java
-            ├── ClientAskActor.java
-            └── ContactListApp.java
+            └── ProcessingApp.java
 ```
 
 ---
@@ -160,8 +190,54 @@ mvn clean compile
 
 ---
 
+### 3. Lab 2 Solutions (`lab2-solutions`)
+
+```bash
+cd lab2-solutions
+mvn clean compile
+```
+
+#### Exercise 4 (`ex4`) — Sleep/Wakeup Echo Server
+- **PowerShell:**
+  ```powershell
+  mvn exec:java '-Dexec.mainClass=com.polimi.nsds.akka.ex4.ContactListApp'
+  ```
+- **Bash / CMD:**
+  ```bash
+  mvn exec:java -Dexec.mainClass="com.polimi.nsds.akka.ex4.ContactListApp"
+  ```
+
+#### Exercise 5 (`ex5`) — Fault-Tolerant Contact List (`resume` vs `restart`)
+- **PowerShell:**
+  ```powershell
+  # Runs both RESUME and RESTART strategies back-to-back:
+  mvn exec:java '-Dexec.mainClass=com.polimi.nsds.akka.ex5.ContactListApp'
+  # Run only RESUME or only RESTART:
+  mvn exec:java '-Dexec.mainClass=com.polimi.nsds.akka.ex5.ContactListApp' '-Dexec.args=resume'
+  mvn exec:java '-Dexec.mainClass=com.polimi.nsds.akka.ex5.ContactListApp' '-Dexec.args=restart'
+  ```
+- **Bash / CMD:**
+  ```bash
+  mvn exec:java -Dexec.mainClass="com.polimi.nsds.akka.ex5.ContactListApp"
+  mvn exec:java -Dexec.mainClass="com.polimi.nsds.akka.ex5.ContactListApp" -Dexec.args="resume"
+  mvn exec:java -Dexec.mainClass="com.polimi.nsds.akka.ex5.ContactListApp" -Dexec.args="restart"
+  ```
+
+#### Exercise 6 (`ex6`) — Non-Blocking Uppercase Server (`scheduler.scheduleOnce` + `stash`)
+- **PowerShell:**
+  ```powershell
+  mvn exec:java '-Dexec.mainClass=com.polimi.nsds.akka.ex6.ProcessingApp'
+  ```
+- **Bash / CMD:**
+  ```bash
+  mvn exec:java -Dexec.mainClass="com.polimi.nsds.akka.ex6.ProcessingApp"
+  ```
+
+---
+
 ## 💻 Running from an IDE
 
-- **IntelliJ IDEA**: Right-click on `akka-lab-template/pom.xml` or `lab1-solutions/pom.xml`, select **"Add as Maven Project"**, open any class with a `main` method, and click **Run (▶)**.
+- **IntelliJ IDEA**: Right-click on `akka-lab-template/pom.xml`, `lab1-solutions/pom.xml`, or `lab2-solutions/pom.xml`, select **"Add as Maven Project"**, open any class with a `main` method, and click **Run (▶)**.
 - **VS Code**: Open the repository folder, ensure the **Extension Pack for Java** is installed, open any class with a `main` method, and click **Run** above `main`.
+
 
