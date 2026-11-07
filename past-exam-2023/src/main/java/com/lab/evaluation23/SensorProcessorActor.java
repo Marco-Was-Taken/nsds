@@ -5,7 +5,8 @@ import akka.actor.Props;
 
 public class SensorProcessorActor extends AbstractActor {
 
-	private double currentAverage;
+	private double currentAverage = 0;
+	private int totalReads = 0;
 
 	@Override
 	public Receive createReceive() {
@@ -16,7 +17,12 @@ public class SensorProcessorActor extends AbstractActor {
 
 		System.out.println("SENSOR PROCESSOR " + self() + ": Got data from " + msg.getSender());
 
-		// ...
+		if(msg.getTemperature() < 0){
+			throw  new Exception("Temperature is negative!");
+		}
+
+		totalReads++;
+		currentAverage = (msg.getTemperature() + currentAverage)/totalReads;
 		
 		System.out.println("SENSOR PROCESSOR " + self() + ": Current avg is " + currentAverage);
 	}

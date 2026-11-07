@@ -15,6 +15,7 @@
         <module>akka-lab-template</module>
         <module>lab1-solutions</module>
         <module>lab2-solutions</module>
+        <module>past-exam-2022</module>
         <module>past-exam-2023</module>
     </modules>
 </project>

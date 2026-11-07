@@ -26,10 +26,11 @@ public class SensorDataProcessor {
 		}
 
 		// Create dispatcher
-		// final ActorRef dispatcher = ....
+		final ActorRef dispatcher = sys.actorOf(DispatcherActor.props(), "DispatcherActor");
 
 		// Waiting until system is ready
 		try {
+			dispatcher.tell(new DispatchLogicMsg(0), ActorRef.noSender());
 			TimeUnit.SECONDS.sleep(1);
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
@@ -52,7 +53,7 @@ public class SensorDataProcessor {
 		}
 
 		// Re-configure dispatcher to use Round Robin
-		// ...
+		dispatcher.tell(new DispatchLogicMsg(DispatchLogicMsg.ROUND_ROBIN), ActorRef.noSender());
 		
 		// Waiting for dispatcher reconfiguration
 		try {
@@ -73,7 +74,7 @@ public class SensorDataProcessor {
 		ActorRef faultySensor = sys.actorOf(TemperatureSensorFaultyActor.props(), "tFaulty");
 		sensors.add(0, faultySensor);
 		
-		// ...
+		dispatcher.tell(new DispatchLogicMsg(DispatchLogicMsg.LOAD_BALANCER), ActorRef.noSender());
 		
 		// Wait until system is ready again
 		try {
