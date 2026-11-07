@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.polimi.nsds.akka</groupId>
+    <artifactId>akka</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>akka</name>
+
+    <modules>
+        <module>akka-lab-template</module>
+        <module>lab1-solutions</module>
+        <module>lab2-solutions</module>
+        <module>past-exam-2022</module>
+        <module>past-exam-2023</module>
+        <module>akka-exam</module>
+    </modules>
+</project>
