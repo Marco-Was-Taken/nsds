@@ -14,17 +14,21 @@ import static akka.pattern.Patterns.ask;
 
 public class CounterClientActor extends AbstractActor {
 
-	private static final Duration INTERLEAVE = Duration.ofMillis(300);
+	private static final Duration INTERLEAVE = Duration.ofMillis(100);
 	private scala.concurrent.duration.Duration timeout = scala.concurrent.duration.Duration.create(5000, TimeUnit.MILLISECONDS);
 
 	private final ActorRef coordinator;
 	private List<Msg> script;
 	private int id;
 
-	private final List<Msg> script0 = Arrays.asList(new ReportMsg(false));
+	private final List<Msg> script0 = Arrays.asList(new RecordMsg(0, 10), new RecordMsg(1, 7), new ReportMsg(false),
+			new RecordMsg(1, 3), new ReportMsg(true), new ReportMsg(false), new RecordMsg(3, 4), new RecordMsg(0, 0),
+			new ReportMsg(false));
 
-	private final List<Msg> script1 =
-			Arrays.asList(new RecordMsg(0, 4));
+	private final List<Msg> script1 = Arrays.asList(new RecordMsg(0, 4), new ReportMsg(false), new RecordMsg(2, 3),
+			new RecordMsg(2, 5), new ReportMsg(false), new RecordMsg(3, 4), new RecordMsg(0, 0), new ReportMsg(false));
+
+
 	private int position;
 	private boolean started;
 
@@ -83,16 +87,4 @@ public class CounterClientActor extends AbstractActor {
 				getContext().dispatcher(), self());
 
 	}
-
-	/**
-	 *
-	 * private final List<Msg> script0 = Arrays.asList(new RecordMsg(0, 10), new RecordMsg(1, 7), new ReportMsg(false),
-	 * 			new RecordMsg(1, 3), new ReportMsg(true), new ReportMsg(false), new RecordMsg(3, 4), new RecordMsg(0, 0),
-	 * 			new ReportMsg(false));
-	 *
-	 * 	private final List<Msg> script1 =
-	 * 			Arrays.asList(new RecordMsg(0, 4), new ReportMsg(false), new RecordMsg(2, 3),
-	 * 			new RecordMsg(2, 5), new ReportMsg(false), new RecordMsg(3, 4), new RecordMsg(0, 0), new ReportMsg(false));
-	 */
-
 }
