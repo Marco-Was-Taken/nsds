@@ -12,7 +12,7 @@
     <name>kafka</name>
 
     <modules>
-        <module>base</module>
+        <module>lab/lab1</module>
         <module>kafka-lab-template</module>
         <module>kafka-exam</module>
     </modules>
