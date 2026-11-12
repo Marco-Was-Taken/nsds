@@ -1,4 +1,4 @@
-package it.polimi.middleware.kafka.basic;
+package it.polimi.middleware.kafka.ex1;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;

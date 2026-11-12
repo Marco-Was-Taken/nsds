@@ -1,4 +1,4 @@
-package it.polimi.middleware.kafka.atomic_forward;
+package it.polimi.middleware.kafka.ex4;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;

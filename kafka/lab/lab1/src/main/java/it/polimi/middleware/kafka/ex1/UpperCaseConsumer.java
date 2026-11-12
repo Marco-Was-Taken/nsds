@@ -1,4 +1,4 @@
-package it.polimi.middleware.kafka.basic;
+package it.polimi.middleware.kafka.ex1;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -34,29 +34,27 @@ public class UpperCaseConsumer {
         final Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, serverAddr);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        // Es. 1 (nessuna garanzia): auto-commit abilitato, possibili perdite o duplicati in caso di crash
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, String.valueOf(autoCommit));
         props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, String.valueOf(autoCommitIntervalMs));
-
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsetResetStrategy);
-
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Collections.singletonList(topic));
 
-
         final Properties propsProducer = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, serverAddr);
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        propsProducer.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, serverAddr);
+        propsProducer.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        propsProducer.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         KafkaProducer<String, String> producer = new KafkaProducer<>(propsProducer);
 
         while (true) {
             final ConsumerRecords<String, String> records = consumer.poll(Duration.of(5, ChronoUnit.MINUTES));
             for (final ConsumerRecord<String, String> record : records) {
                 String value = record.value().toLowerCase();
-                producer.send(new ProducerRecord<>(upperCaseTopic, value));
+                producer.send(new ProducerRecord<>(upperCaseTopic, record.key(), value));
             }
         }
     }

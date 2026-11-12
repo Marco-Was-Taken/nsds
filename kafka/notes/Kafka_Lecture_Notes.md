@@ -160,7 +160,7 @@ I tipi generici di `KafkaProducer<K, V>` e `KafkaConsumer<K, V>` devono corrispo
 ## 4. Tutti i Template di Configurazione Pronti all'Uso (Codice Completo)
 
 ### 4.1 Producer Base (Asincrono e Sincrono con `waitAck`) + Producer Idempotente
-*(Rif: [`BasicProducer.java`](file:///C:/Users/marco/Documents/GitHub/nsds/kafka/base/src/main/java/it/polimi/middleware/kafka/basic/BasicProducer.java), [`IdempotentProducer.java`](file:///C:/Users/marco/Documents/GitHub/nsds/kafka/base/src/main/java/it/polimi/middleware/kafka/atomic_forward/IdempotentProducer.java))*
+*(Rif: [`IdempotentProducer.java`](file:///C:/Users/marco/Documents/GitHub/nsds/kafka/base/src/main/java/it/polimi/middleware/kafka/basic/BasicProducer.java), [`IdempotentProducer.java`](file:///C:/Users/marco/Documents/GitHub/nsds/kafka/base/src/main/java/it/polimi/middleware/kafka/atomic_forward/IdempotentProducer.java))*
 
 ```java
 // --- CONFIGURAZIONE PRODUCER (BASE O IDEMPOTENTE) ---
