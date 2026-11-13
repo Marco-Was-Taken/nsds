@@ -3,7 +3,7 @@
 Repository for **Networked Software for Distributed Systems (NSDS)** at **Politecnico di Milano**, organized into two self-contained sections:
 
 - **[`akka/`](./akka/)**: Akka Classic (`akka-actor_2.13`) templates, lab solutions (`lab1-solutions`, `lab2-solutions`), past exams (`past-exam-2022`, `past-exam-2023`), lecture notes, and a ready-to-use **`akka/akka-exam/`** module.
-- **[`kafka/`](./kafka/)**: Apache Kafka (`kafka-clients`) templates (`kafka-lab-template`), folders for lectures/labs/notes, and a ready-to-use **`kafka/kafka-exam/`** module.
+- **[`kafka/`](./kafka/)**: Apache Kafka (`kafka-clients`) templates ([`kafka-lab-template/`](./kafka/kafka-lab-template/README.md)), Lab 1 exercises (`lab/lab1`), lecture slides/notes, and a ready-to-use **`kafka/kafka-exam/`** module.
 
 ---
 
@@ -27,10 +27,10 @@ nsds/
 │   └── notes/                    # Akka lecture notes
 └── kafka/
     ├── pom.xml                   # Kafka parent POM
-    ├── README.md
-    ├── kafka-lab-template/       # Reusable Producer, Consumer & EOS Forwarder templates
+    ├── README.md                 # Kafka setup, CLI commands & quick start
+    ├── kafka-lab-template/       # 8 ready-to-use Kafka templates + README index
     ├── kafka-exam/               # Ready-to-use module for the Kafka exam
-    ├── lab/                      # Kafka lab PDFs
+    ├── lab/lab1/                 # Kafka Lab 1 exercises & solutions
     ├── lectures/                 # Kafka lecture slides
     └── notes/                    # Kafka lecture notes
 ```

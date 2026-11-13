@@ -79,6 +79,21 @@ Puoi eseguire i tool CLI di Kafka direttamente da PowerShell anteponendo `wsl /o
 
 ---
 
+## 📚 Template Pronti per Lab & Esame (`kafka-lab-template`)
+
+Tutti i template riutilizzabili (aggiornati dopo il Lab 1) sono raccolti e indicizzati in **[`kafka-lab-template/README.md`](./kafka-lab-template/README.md)**:
+
+- [`TopicAdminTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/TopicAdminTemplate.java) — Creazione/reset topic, partizioni e *Log Compaction*
+- [`BasicProducerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/BasicProducerTemplate.java) — Producer base (async/sync ACK) e *Idempotent Producer*
+- [`TransactionalProducerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/TransactionalProducerTemplate.java) — Producer transazionale (`commitTransaction` / `flush` + `abortTransaction`)
+- [`BasicConsumerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/BasicConsumerTemplate.java) — Consumer base con *Auto-Commit*
+- [`ManualCommitConsumerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/ManualCommitConsumerTemplate.java) — Consumer *At-Least-Once* con `commitSync()`
+- [`TransactionalConsumerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/TransactionalConsumerTemplate.java) — Consumer transazionale (`read_committed` vs `read_uncommitted`)
+- [`TransactionalForwarderTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/TransactionalForwarderTemplate.java) — Forwarder *Stateless* End-to-End Exactly-Once (`sendOffsetsToTransaction` + `seek`)
+- [`StatefulForwarderTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/StatefulForwarderTemplate.java) — Forwarder *Stateful* Fault-Tolerant EOS (recovery da topic compattato + `ConsumerRebalanceListener`)
+
+---
+
 ## ▶️ Eseguire i Template e l'Esame
 
 ### Da IntelliJ IDEA
@@ -91,12 +106,19 @@ Puoi eseguire i tool CLI di Kafka direttamente da PowerShell anteponendo `wsl /o
 cd kafka
 mvn clean compile
 
-# Avvia il Consumer di esempio
+# 1. Crea/resetta i topic di test
+mvn exec:java -pl kafka-lab-template '-Dexec.mainClass=com.polimi.kafka.template.TopicAdminTemplate' '-Dexec.args=inputTopic 2 1 false'
+
+# 2. Avvia il Consumer di esempio
 mvn exec:java -pl kafka-lab-template '-Dexec.mainClass=com.polimi.kafka.template.BasicConsumerTemplate'
 
-# Avvia il Producer di esempio (in un altro terminale)
+# 3. Avvia il Producer di esempio (in un altro terminale)
 mvn exec:java -pl kafka-lab-template '-Dexec.mainClass=com.polimi.kafka.template.BasicProducerTemplate'
 
-# Avvia il Forwarder Transazionale (Exactly-Once)
+# 4. Avvia il Forwarder Transazionale Stateless (Exactly-Once)
 mvn exec:java -pl kafka-lab-template '-Dexec.mainClass=com.polimi.kafka.template.TransactionalForwarderTemplate'
+
+# 5. Avvia il Forwarder Stateful Fault-Tolerant (Exactly-Once con stato su topic compattato)
+mvn exec:java -pl kafka-lab-template '-Dexec.mainClass=com.polimi.kafka.template.StatefulForwarderTemplate'
 ```
+

@@ -15,6 +15,7 @@ nsds-akka-local/
 ├── notes/
 │   └── Akka_Lecture_Notes.md
 ├── akka-lab-template/
+│   ├── README.md
 │   ├── pom.xml
 │   └── src/main/
 │       ├── resources/
@@ -26,7 +27,9 @@ nsds-akka-local/
 │           ├── StateMachineActorTemplate.java
 │           ├── StashActorTemplate.java
 │           ├── RequestReplyTemplate.java
+│           ├── SchedulerAndBusyStashTemplate.java
 │           ├── SupervisionTemplate.java
+│           ├── SupervisorDispatcherTemplate.java
 │           └── RemoteDistributionTemplate.java
 ├── lab1-solutions/
 │   ├── pom.xml
@@ -114,7 +117,9 @@ mvn clean compile
   mvn exec:java '-Dexec.mainClass=com.polimi.akka.template.StateMachineActorTemplate'
   mvn exec:java '-Dexec.mainClass=com.polimi.akka.template.StashActorTemplate'
   mvn exec:java '-Dexec.mainClass=com.polimi.akka.template.RequestReplyTemplate'
+  mvn exec:java '-Dexec.mainClass=com.polimi.akka.template.SchedulerAndBusyStashTemplate'
   mvn exec:java '-Dexec.mainClass=com.polimi.akka.template.SupervisionTemplate'
+  mvn exec:java '-Dexec.mainClass=com.polimi.akka.template.SupervisorDispatcherTemplate'
   ```
 - **Bash / CMD:**
   ```bash
@@ -122,7 +127,9 @@ mvn clean compile
   mvn exec:java -Dexec.mainClass="com.polimi.akka.template.StateMachineActorTemplate"
   mvn exec:java -Dexec.mainClass="com.polimi.akka.template.StashActorTemplate"
   mvn exec:java -Dexec.mainClass="com.polimi.akka.template.RequestReplyTemplate"
+  mvn exec:java -Dexec.mainClass="com.polimi.akka.template.SchedulerAndBusyStashTemplate"
   mvn exec:java -Dexec.mainClass="com.polimi.akka.template.SupervisionTemplate"
+  mvn exec:java -Dexec.mainClass="com.polimi.akka.template.SupervisorDispatcherTemplate"
   ```
 
 ---
