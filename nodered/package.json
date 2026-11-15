@@ -1,0 +1,21 @@
+{
+  "name": "nsds-nodered",
+  "version": "1.0.0",
+  "description": "Node-RED workspace, templates, scripts and exam environment for NSDS (Politecnico di Milano)",
+  "private": true,
+  "scripts": {
+    "start:exam": "node-red -u ./nodered-exam ./nodered-exam/flows.json",
+    "start:templates": "node-red -u ./nodered-lab-template ./nodered-lab-template/flows/all_templates_combined.json",
+    "start:basics": "node-red -u ./nodered-lab-template ./nodered-lab-template/flows/01_basics_and_async.json",
+    "start:functions": "node-red -u ./nodered-lab-template ./nodered-lab-template/flows/02_function_nodes_patterns.json",
+    "start:datasharing": "node-red -u ./nodered-lab-template ./nodered-lab-template/flows/03_data_sharing_files_and_context.json",
+    "start:udp": "node-red -u ./nodered-lab-template ./nodered-lab-template/flows/04_udp_json_networking.json",
+    "start:mqtt": "node-red -u ./nodered-lab-template ./nodered-lab-template/flows/05_mqtt_pubsub_and_qos.json",
+    "test:udp": "node ./nodered-lab-template/scripts/udp-test-client.js",
+    "test:mqtt": "node ./nodered-lab-template/scripts/mqtt-test-client.js"
+  },
+  "dependencies": {
+    "mqtt": "^5.10.0",
+    "node-red": "^5.0.0"
+  }
+}

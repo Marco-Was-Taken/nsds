@@ -1,0 +1,1611 @@
+[
+    {
+        "id": "tab-basics-01",
+        "type": "tab",
+        "label": "1.1 Basics & Async",
+        "disabled": false,
+        "info": "Lecture 1.1: Node-RED Basics - Inject, Debug, Switch routing, and Asynchronous non-deterministic execution."
+    },
+    {
+        "id": "comment-11-a",
+        "type": "comment",
+        "z": "tab-basics-01",
+        "name": "Example 1: Timestamp Inject -> Debug",
+        "info": "Click the inject button (or enable repeat every 1s) to generate a timestamp message.",
+        "x": 200,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "inj-11-ts",
+        "type": "inject",
+        "z": "tab-basics-01",
+        "name": "Generate Timestamp",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "clock",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 120,
+        "wires": [
+            [
+                "dbg-11-ts"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-11-ts",
+        "type": "debug",
+        "z": "tab-basics-01",
+        "name": "Print Out Timestamp",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 440,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "comment-11-b",
+        "type": "comment",
+        "z": "tab-basics-01",
+        "name": "Example 2: Switch Routing (Temperature > 15C?)",
+        "info": "Splits the flow based on msg.payload numeric value.",
+        "x": 230,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "inj-11-warm",
+        "type": "inject",
+        "z": "tab-basics-01",
+        "name": "Temp = 22.1",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "sensor/temp",
+        "payload": "22.1",
+        "payloadType": "num",
+        "x": 130,
+        "y": 260,
+        "wires": [
+            [
+                "sw-11-temp"
+            ]
+        ]
+    },
+    {
+        "id": "inj-11-cold",
+        "type": "inject",
+        "z": "tab-basics-01",
+        "name": "Temp = 12.5",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "sensor/temp",
+        "payload": "12.5",
+        "payloadType": "num",
+        "x": 130,
+        "y": 320,
+        "wires": [
+            [
+                "sw-11-temp"
+            ]
+        ]
+    },
+    {
+        "id": "sw-11-temp",
+        "type": "switch",
+        "z": "tab-basics-01",
+        "name": "Temperature > 15C?",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gt",
+                "v": "15",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 360,
+        "y": 290,
+        "wires": [
+            [
+                "fn-11-on"
+            ],
+            [
+                "fn-11-off"
+            ]
+        ]
+    },
+    {
+        "id": "fn-11-on",
+        "type": "function",
+        "z": "tab-basics-01",
+        "name": "Turn On Conditioning",
+        "func": "msg.payload = \"AC ON (temp=\" + msg.payload + \")\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 260,
+        "wires": [
+            [
+                "dbg-11-ac"
+            ]
+        ]
+    },
+    {
+        "id": "fn-11-off",
+        "type": "function",
+        "z": "tab-basics-01",
+        "name": "Turn Off Conditioning",
+        "func": "msg.payload = \"AC OFF (temp=\" + msg.payload + \")\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 320,
+        "wires": [
+            [
+                "dbg-11-ac"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-11-ac",
+        "type": "debug",
+        "z": "tab-basics-01",
+        "name": "AC Action",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 820,
+        "y": 290,
+        "wires": []
+    },
+    {
+        "id": "comment-11-c",
+        "type": "comment",
+        "z": "tab-basics-01",
+        "name": "Example 3: Asynchronous Non-Deterministic Execution (any interleaving possible!)",
+        "info": "Because Node-RED schedules nodes asynchronously on the Node.js event loop, any interleaving of 1, 2, 3 is possible.",
+        "x": 320,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "inj-11-hello",
+        "type": "inject",
+        "z": "tab-basics-01",
+        "name": "Trigger \"Hello\"",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Hello",
+        "payloadType": "str",
+        "x": 140,
+        "y": 500,
+        "wires": [
+            [
+                "fn-11-h1",
+                "fn-11-h2",
+                "fn-11-h3"
+            ]
+        ]
+    },
+    {
+        "id": "fn-11-h1",
+        "type": "function",
+        "z": "tab-basics-01",
+        "name": "\"Hello\" + 1",
+        "func": "msg.payload = msg.payload + \" 1\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 440,
+        "wires": [
+            [
+                "dbg-11-h1"
+            ]
+        ]
+    },
+    {
+        "id": "fn-11-h2",
+        "type": "function",
+        "z": "tab-basics-01",
+        "name": "\"Hello\" + 2",
+        "func": "msg.payload = msg.payload + \" 2\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 500,
+        "wires": [
+            [
+                "dbg-11-h2"
+            ]
+        ]
+    },
+    {
+        "id": "fn-11-h3",
+        "type": "function",
+        "z": "tab-basics-01",
+        "name": "\"Hello\" + 3",
+        "func": "msg.payload = msg.payload + \" 3\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 560,
+        "wires": [
+            [
+                "dbg-11-h3"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-11-h1",
+        "type": "debug",
+        "z": "tab-basics-01",
+        "name": "Prints Payload 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 600,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "dbg-11-h2",
+        "type": "debug",
+        "z": "tab-basics-01",
+        "name": "Prints Payload 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 600,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "dbg-11-h3",
+        "type": "debug",
+        "z": "tab-basics-01",
+        "name": "Prints Payload 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 600,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "tab-func-02",
+        "type": "tab",
+        "label": "1.2 Function Patterns",
+        "disabled": false,
+        "info": "Lecture 1.2: Processing / Function Nodes - Even/Odd, Lifecycle hooks (On Start / On Message / On Stop), Override payload, Slicing payload, Multi-output routing, Multi-message sequence."
+    },
+    {
+        "id": "comment-12-a",
+        "type": "comment",
+        "z": "tab-func-02",
+        "name": "Pattern 1: Even / Odd + On Start / On Stop lifecycle hooks",
+        "info": "",
+        "x": 250,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "inj-12-even",
+        "type": "inject",
+        "z": "tab-func-02",
+        "name": "Timestamp",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 120,
+        "wires": [
+            [
+                "fn-12-even"
+            ]
+        ]
+    },
+    {
+        "id": "fn-12-even",
+        "type": "function",
+        "z": "tab-func-02",
+        "name": "Tell Me If Payload is Even",
+        "func": "const ts = msg.payload;\nif (ts % 2 === 0) {\n    msg.payload = \"Time is even (\" + ts + \")\";\n} else {\n    msg.payload = \"Time is odd (\" + ts + \")\";\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Runs once when the flow is deployed\nnode.status({ fill: \"green\", shape: \"dot\", text: \"ready\" });",
+        "finalize": "// Runs when the flow stops or re-deploys\nnode.status({});",
+        "libs": [],
+        "x": 380,
+        "y": 120,
+        "wires": [
+            [
+                "dbg-12-even"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-12-even",
+        "type": "debug",
+        "z": "tab-func-02",
+        "name": "Even/Odd Result",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 630,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "comment-12-b",
+        "type": "comment",
+        "z": "tab-func-02",
+        "name": "Pattern 2: Override & Slice Incoming Payload",
+        "info": "",
+        "x": 210,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "inj-12-sensor",
+        "type": "inject",
+        "z": "tab-func-02",
+        "name": "Sensor Object",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "iot/room1",
+        "payload": "{\"temperature\":23.4,\"humidity\":55}",
+        "payloadType": "json",
+        "x": 140,
+        "y": 280,
+        "wires": [
+            [
+                "fn-12-override",
+                "fn-12-slice"
+            ]
+        ]
+    },
+    {
+        "id": "fn-12-override",
+        "type": "function",
+        "z": "tab-func-02",
+        "name": "Override Payload",
+        "func": "let newMsg = {\n    topic: msg.topic,\n    payload: \"New message!\",\n    _msgid: msg._msgid\n};\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 250,
+        "wires": [
+            [
+                "dbg-12-override"
+            ]
+        ]
+    },
+    {
+        "id": "fn-12-slice",
+        "type": "function",
+        "z": "tab-func-02",
+        "name": "Slice Temperature",
+        "func": "let newMsg = {\n    topic: msg.topic,\n    payload: msg.payload.temperature,\n    _msgid: msg._msgid\n};\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 310,
+        "wires": [
+            [
+                "dbg-12-slice"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-12-override",
+        "type": "debug",
+        "z": "tab-func-02",
+        "name": "Overridden",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 600,
+        "y": 250,
+        "wires": []
+    },
+    {
+        "id": "dbg-12-slice",
+        "type": "debug",
+        "z": "tab-func-02",
+        "name": "Sliced Temp",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 600,
+        "y": 310,
+        "wires": []
+    },
+    {
+        "id": "comment-12-c",
+        "type": "comment",
+        "z": "tab-func-02",
+        "name": "Pattern 3: Multi-output Function Node (Outputs = 3)",
+        "info": "",
+        "x": 230,
+        "y": 390,
+        "wires": []
+    },
+    {
+        "id": "inj-12-high",
+        "type": "inject",
+        "z": "tab-func-02",
+        "name": "\"high\"",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "high",
+        "payloadType": "str",
+        "x": 110,
+        "y": 440,
+        "wires": [
+            [
+                "fn-12-multiout"
+            ]
+        ]
+    },
+    {
+        "id": "inj-12-med",
+        "type": "inject",
+        "z": "tab-func-02",
+        "name": "\"med\"",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "med",
+        "payloadType": "str",
+        "x": 110,
+        "y": 490,
+        "wires": [
+            [
+                "fn-12-multiout"
+            ]
+        ]
+    },
+    {
+        "id": "inj-12-low",
+        "type": "inject",
+        "z": "tab-func-02",
+        "name": "\"low\"",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "low",
+        "payloadType": "str",
+        "x": 110,
+        "y": 540,
+        "wires": [
+            [
+                "fn-12-multiout"
+            ]
+        ]
+    },
+    {
+        "id": "fn-12-multiout",
+        "type": "function",
+        "z": "tab-func-02",
+        "name": "Route by Priority (3 Outputs)",
+        "func": "if (msg.payload === \"high\") {\n    return [msg, null, null];\n} else if (msg.payload === \"med\") {\n    return [null, msg, null];\n} else {\n    return [null, null, msg];\n}",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 490,
+        "wires": [
+            [
+                "dbg-12-high"
+            ],
+            [
+                "dbg-12-med"
+            ],
+            [
+                "dbg-12-low"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-12-high",
+        "type": "debug",
+        "z": "tab-func-02",
+        "name": "HIGH Output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 620,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "dbg-12-med",
+        "type": "debug",
+        "z": "tab-func-02",
+        "name": "MED Output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 620,
+        "y": 490,
+        "wires": []
+    },
+    {
+        "id": "dbg-12-low",
+        "type": "debug",
+        "z": "tab-func-02",
+        "name": "LOW/OTHER Output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 630,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "comment-12-d",
+        "type": "comment",
+        "z": "tab-func-02",
+        "name": "Pattern 4: Multi-message Function Node (returns [msgList])",
+        "info": "Note: In Node-RED, to emit a sequence of messages on output 1, wrap msgList in an outer array: return [msgList];",
+        "x": 250,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "inj-12-seq",
+        "type": "inject",
+        "z": "tab-func-02",
+        "name": "Generate 0..9",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 680,
+        "wires": [
+            [
+                "fn-12-seq"
+            ]
+        ]
+    },
+    {
+        "id": "fn-12-seq",
+        "type": "function",
+        "z": "tab-func-02",
+        "name": "Emit 10 Messages",
+        "func": "let msgList = [];\nfor (let i = 0; i < 10; i++) {\n    msgList.push({ payload: i });\n}\n// Wrapped in [msgList] so all 10 messages are sent sequentially on output 1\nreturn [msgList];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 680,
+        "wires": [
+            [
+                "dbg-12-seq"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-12-seq",
+        "type": "debug",
+        "z": "tab-func-02",
+        "name": "Sequence Out",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 600,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "tab-share-03",
+        "type": "tab",
+        "label": "1.3 Data Sharing",
+        "disabled": false,
+        "info": "Lecture 1.3: Data Sharing - File-based Counter, Node Context, Flow Context, Global Context, and Persistent File Context Store."
+    },
+    {
+        "id": "comment-13-a",
+        "type": "comment",
+        "z": "tab-share-03",
+        "name": "Pattern 1: File-based Counter (read -> increment -> write back)",
+        "info": "At boot (once: true), initializes counter.txt to 0. Each Trigger reads, increments, writes back, and prints.",
+        "x": 260,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "inj-13-trigger-file",
+        "type": "inject",
+        "z": "tab-share-03",
+        "name": "Trigger",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 120,
+        "wires": [
+            [
+                "file-in-13"
+            ]
+        ]
+    },
+    {
+        "id": "file-in-13",
+        "type": "file in",
+        "z": "tab-share-03",
+        "name": "Read Counter",
+        "filename": "nodered-lab-template/data/counter.txt",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 310,
+        "y": 120,
+        "wires": [
+            [
+                "fn-13-inc-file"
+            ]
+        ]
+    },
+    {
+        "id": "fn-13-inc-file",
+        "type": "function",
+        "z": "tab-share-03",
+        "name": "Convert and Increment",
+        "func": "let current = parseInt(msg.payload, 10);\nif (isNaN(current)) {\n    current = 0;\n}\nmsg.payload = current + 1;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 120,
+        "wires": [
+            [
+                "file-out-13",
+                "dbg-13-file"
+            ]
+        ]
+    },
+    {
+        "id": "inj-13-init-file",
+        "type": "inject",
+        "z": "tab-share-03",
+        "name": "Initialize to 0",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "0",
+        "payloadType": "num",
+        "x": 130,
+        "y": 200,
+        "wires": [
+            [
+                "file-out-13"
+            ]
+        ]
+    },
+    {
+        "id": "file-out-13",
+        "type": "file",
+        "z": "tab-share-03",
+        "name": "Write Counter",
+        "filename": "nodered-lab-template/data/counter.txt",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 370,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "dbg-13-file",
+        "type": "debug",
+        "z": "tab-share-03",
+        "name": "Current File Value",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 790,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "comment-13-b",
+        "type": "comment",
+        "z": "tab-share-03",
+        "name": "Pattern 2: Node Context Counter (in-memory, resets on full deploy)",
+        "info": "",
+        "x": 270,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "inj-13-ctx",
+        "type": "inject",
+        "z": "tab-share-03",
+        "name": "Trigger",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 340,
+        "wires": [
+            [
+                "fn-13-ctx"
+            ]
+        ]
+    },
+    {
+        "id": "fn-13-ctx",
+        "type": "function",
+        "z": "tab-share-03",
+        "name": "Count (Node Context)",
+        "func": "let val = context.get(\"value\");\nif (val === undefined) {\n    val = 0;\n}\nmsg.payload = val;\ncontext.set(\"value\", val + 1);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 340,
+        "wires": [
+            [
+                "dbg-13-ctx"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-13-ctx",
+        "type": "debug",
+        "z": "tab-share-03",
+        "name": "Current Value",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 600,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "comment-13-c",
+        "type": "comment",
+        "z": "tab-share-03",
+        "name": "Pattern 3: Flow Context & Persistent File Context Store",
+        "info": "Uses flow.set/flow.get to share state across chains, and store 'file' (configured in settings.js) to survive restarts.",
+        "x": 240,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "inj-13-flow-set",
+        "type": "inject",
+        "z": "tab-share-03",
+        "name": "Add +5 to Flow Total",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "5",
+        "payloadType": "num",
+        "x": 160,
+        "y": 480,
+        "wires": [
+            [
+                "fn-13-flow-set"
+            ]
+        ]
+    },
+    {
+        "id": "fn-13-flow-set",
+        "type": "function",
+        "z": "tab-share-03",
+        "name": "Update Flow & Global Context",
+        "func": "const prevFlow = flow.get(\"runningTotal\") || 0;\nconst nextFlow = prevFlow + msg.payload;\nflow.set(\"runningTotal\", nextFlow);\n\n// Also persist across restarts using the 'file' store from settings.js\nconst prevPersistent = global.get(\"persistentCounter\", \"file\") || 0;\nglobal.set(\"persistentCounter\", prevPersistent + 1, \"file\");\n\nmsg.payload = { flowTotal: nextFlow, persistentHits: prevPersistent + 1 };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 480,
+        "wires": [
+            [
+                "dbg-13-flow"
+            ]
+        ]
+    },
+    {
+        "id": "inj-13-flow-read",
+        "type": "inject",
+        "z": "tab-share-03",
+        "name": "Read Shared State",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 540,
+        "wires": [
+            [
+                "fn-13-flow-read"
+            ]
+        ]
+    },
+    {
+        "id": "fn-13-flow-read",
+        "type": "function",
+        "z": "tab-share-03",
+        "name": "Read Flow & Global",
+        "func": "msg.payload = {\n    flowTotal: flow.get(\"runningTotal\") || 0,\n    persistentHits: global.get(\"persistentCounter\", \"file\") || 0\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 540,
+        "wires": [
+            [
+                "dbg-13-flow"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-13-flow",
+        "type": "debug",
+        "z": "tab-share-03",
+        "name": "Shared State",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 700,
+        "y": 510,
+        "wires": []
+    },
+    {
+        "id": "tab-udp-04",
+        "type": "tab",
+        "label": "2.1 Networking UDP",
+        "disabled": false,
+        "info": "Lecture 2.1: UDP Sockets & JSON Serialization (udp out, udp in, explicit json conversion)."
+    },
+    {
+        "id": "comment-21-a",
+        "type": "comment",
+        "z": "tab-udp-04",
+        "name": "UDP Sender: Build JS Object -> Convert to JSON String -> Send to 127.0.0.1:7777",
+        "info": "",
+        "x": 310,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "inj-21-ts",
+        "type": "inject",
+        "z": "tab-udp-04",
+        "name": "Generate Timestamp",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 140,
+        "wires": [
+            [
+                "fn-21-greet"
+            ]
+        ]
+    },
+    {
+        "id": "fn-21-greet",
+        "type": "function",
+        "z": "tab-udp-04",
+        "name": "Add Greeting to Payload",
+        "func": "let newPayload = {\n    greeting: \"Hello!\",\n    timestamp: msg.payload\n};\nlet newMsg = {\n    topic: msg.topic,\n    payload: newPayload,\n    _msgid: msg._msgid\n};\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 140,
+        "wires": [
+            [
+                "json-21-str",
+                "dbg-21-obj-out"
+            ]
+        ]
+    },
+    {
+        "id": "json-21-str",
+        "type": "json",
+        "z": "tab-udp-04",
+        "name": "Convert to JSON",
+        "property": "payload",
+        "action": "str",
+        "pretty": false,
+        "x": 650,
+        "y": 140,
+        "wires": [
+            [
+                "udp-21-out",
+                "dbg-21-json-out"
+            ]
+        ]
+    },
+    {
+        "id": "udp-21-out",
+        "type": "udp out",
+        "z": "tab-udp-04",
+        "name": "Send UDP (127.0.0.1:7777)",
+        "addr": "127.0.0.1",
+        "iface": "",
+        "port": "7777",
+        "ipv": "udp4",
+        "outport": "",
+        "base64": false,
+        "multicast": "false",
+        "x": 910,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "dbg-21-obj-out",
+        "type": "debug",
+        "z": "tab-udp-04",
+        "name": "Before JSON (JS Object)",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 670,
+        "y": 210,
+        "wires": []
+    },
+    {
+        "id": "dbg-21-json-out",
+        "type": "debug",
+        "z": "tab-udp-04",
+        "name": "Serialized JSON String",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 900,
+        "y": 210,
+        "wires": []
+    },
+    {
+        "id": "comment-21-b",
+        "type": "comment",
+        "z": "tab-udp-04",
+        "name": "UDP Receiver: Listen on port 7777 -> Convert JSON String back to JS Object",
+        "info": "",
+        "x": 300,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "udp-21-in",
+        "type": "udp in",
+        "z": "tab-udp-04",
+        "name": "Receive UDP (:7777)",
+        "iface": "",
+        "port": "7777",
+        "ipv": "udp4",
+        "multicast": "false",
+        "group": "",
+        "datatype": "utf8",
+        "x": 160,
+        "y": 370,
+        "wires": [
+            [
+                "dbg-21-raw-in",
+                "json-21-obj"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-21-raw-in",
+        "type": "debug",
+        "z": "tab-udp-04",
+        "name": "Raw UDP String",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 410,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "json-21-obj",
+        "type": "json",
+        "z": "tab-udp-04",
+        "name": "Convert to JS Object",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 420,
+        "y": 410,
+        "wires": [
+            [
+                "dbg-21-parsed-in"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-21-parsed-in",
+        "type": "debug",
+        "z": "tab-udp-04",
+        "name": "Parsed JS Object",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 670,
+        "y": 410,
+        "wires": []
+    },
+    {
+        "id": "tab-mqtt-05",
+        "type": "tab",
+        "label": "2.2 Networking MQTT",
+        "disabled": false,
+        "info": "Lecture 2.2: MQTT Pub/Sub using local Mosquitto broker (localhost:1883), QoS 0/1/2, hierarchical topics, auto JSON parsing, and Sensor.Community payload parsing."
+    },
+    {
+        "id": "mqtt-broker-local",
+        "type": "mqtt-broker",
+        "name": "Local Mosquitto (localhost:1883)",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleanSession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "comment-22-a",
+        "type": "comment",
+        "z": "tab-mqtt-05",
+        "name": "Example 1: One Publisher -> Multiple Subscribers on /nodered/test (QoS 2)",
+        "info": "Make sure Mosquitto is running (..\\start-mqtt.ps1).",
+        "x": 300,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "inj-22-ts",
+        "type": "inject",
+        "z": "tab-mqtt-05",
+        "name": "Generate Timestamp",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 120,
+        "wires": [
+            [
+                "mqtt-out-22-test"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt-out-22-test",
+        "type": "mqtt out",
+        "z": "tab-mqtt-05",
+        "name": "Publish to /nodered/test",
+        "topic": "/nodered/test",
+        "qos": "2",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "mqtt-broker-local",
+        "x": 450,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "mqtt-in-22-sub1",
+        "type": "mqtt in",
+        "z": "tab-mqtt-05",
+        "name": "Subscribe /nodered/test (A)",
+        "topic": "/nodered/test",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "mqtt-broker-local",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 190,
+        "wires": [
+            [
+                "dbg-22-sub1"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt-in-22-sub2",
+        "type": "mqtt in",
+        "z": "tab-mqtt-05",
+        "name": "Subscribe /nodered/test (B)",
+        "topic": "/nodered/test",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "mqtt-broker-local",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 250,
+        "wires": [
+            [
+                "dbg-22-sub2"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-22-sub1",
+        "type": "debug",
+        "z": "tab-mqtt-05",
+        "name": "Subscriber A",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 450,
+        "y": 190,
+        "wires": []
+    },
+    {
+        "id": "dbg-22-sub2",
+        "type": "debug",
+        "z": "tab-mqtt-05",
+        "name": "Subscriber B",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 450,
+        "y": 250,
+        "wires": []
+    },
+    {
+        "id": "comment-22-b",
+        "type": "comment",
+        "z": "tab-mqtt-05",
+        "name": "Example 2: Hierarchical Topics & Automatic JSON Serialization (Sensor.Community)",
+        "info": "",
+        "x": 320,
+        "y": 330,
+        "wires": []
+    },
+    {
+        "id": "inj-22-sc",
+        "type": "inject",
+        "z": "tab-mqtt-05",
+        "name": "Simulate Sensor.Community",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 390,
+        "wires": [
+            [
+                "fn-22-sc-build"
+            ]
+        ]
+    },
+    {
+        "id": "fn-22-sc-build",
+        "type": "function",
+        "z": "tab-mqtt-05",
+        "name": "Build Sensor.Community Object",
+        "func": "msg.topic = \"/smartcity/milan\";\nmsg.payload = {\n    id: 10372898440,\n    timestamp: new Date().toISOString(),\n    sensordatavalues: [\n        { id: 22999226740, value_type: \"temperature\", value: \"16.90\" },\n        { id: 22999226768, value_type: \"humidity\", value: \"99.90\" }\n    ],\n    sensor: { id: 21666, pin: \"7\", sensor_type: { id: 9, name: \"DHT22\" } },\n    location: { latitude: \"45.486\", longitude: \"9.19\", country: \"IT\" }\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 390,
+        "wires": [
+            [
+                "mqtt-out-22-sc"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt-out-22-sc",
+        "type": "mqtt out",
+        "z": "tab-mqtt-05",
+        "name": "Publish /smartcity/milan (QoS 1)",
+        "topic": "",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "mqtt-broker-local",
+        "x": 760,
+        "y": 390,
+        "wires": []
+    },
+    {
+        "id": "mqtt-in-22-sc",
+        "type": "mqtt in",
+        "z": "tab-mqtt-05",
+        "name": "Subscribe /smartcity/+ (Parsed JSON)",
+        "topic": "/smartcity/+",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "mqtt-broker-local",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 200,
+        "y": 460,
+        "wires": [
+            [
+                "fn-22-sc-parse",
+                "dbg-22-sc-full"
+            ]
+        ]
+    },
+    {
+        "id": "fn-22-sc-parse",
+        "type": "function",
+        "z": "tab-mqtt-05",
+        "name": "Extract Temperature",
+        "func": "const values = msg.payload.sensordatavalues || [];\nconst tempEntry = values.find(v => v.value_type === \"temperature\");\nif (!tempEntry) {\n    return null;\n}\nreturn {\n    topic: msg.topic,\n    payload: parseFloat(tempEntry.value),\n    _msgid: msg._msgid\n};",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 460,
+        "wires": [
+            [
+                "dbg-22-sc-temp"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-22-sc-full",
+        "type": "debug",
+        "z": "tab-mqtt-05",
+        "name": "Full Msg (QoS & Retain)",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 500,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "dbg-22-sc-temp",
+        "type": "debug",
+        "z": "tab-mqtt-05",
+        "name": "Extracted Temp",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 740,
+        "y": 460,
+        "wires": []
+    }
+]
