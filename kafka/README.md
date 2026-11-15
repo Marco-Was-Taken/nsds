@@ -79,18 +79,26 @@ Puoi eseguire i tool CLI di Kafka direttamente da PowerShell anteponendo `wsl /o
 
 ---
 
-## 📚 Template Pronti per Lab & Esame (`kafka-lab-template`)
+## 📚 Appunti & Template Pronti per Lab & Esame
 
-Tutti i template riutilizzabili (aggiornati dopo il Lab 1) sono raccolti e indicizzati in **[`kafka-lab-template/README.md`](./kafka-lab-template/README.md)**:
+- **Cheatsheet Centralizzato per Esame (Garanzie None / At-Most-Once / At-Least-Once / Exactly-Once, Lettura & Invio)**: [`notes/Kafka_Delivery_Guarantees_Cheatsheet.md`](./notes/Kafka_Delivery_Guarantees_Cheatsheet.md)
+- **Appunti Dettagliati dalle Lezioni & Lab 1**: [`notes/Kafka_Lecture_Notes.md`](./notes/Kafka_Lecture_Notes.md)
+
+Tutti i **13 template riutilizzabili** sono raccolti e indicizzati in **[`kafka-lab-template/README.md`](./kafka-lab-template/README.md)**:
 
 - [`TopicAdminTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/TopicAdminTemplate.java) — Creazione/reset topic, partizioni e *Log Compaction*
-- [`BasicProducerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/BasicProducerTemplate.java) — Producer base (async/sync ACK) e *Idempotent Producer*
+- [`BasicProducerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/BasicProducerTemplate.java) — Producer per tutte le garanzie (`none`, `at-most-once`, `at-least-once`, `exactly-once` idempotente) + `sync`/`async`/`callback`/`flush`
 - [`TransactionalProducerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/TransactionalProducerTemplate.java) — Producer transazionale (`commitTransaction` / `flush` + `abortTransaction`)
-- [`BasicConsumerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/BasicConsumerTemplate.java) — Consumer base con *Auto-Commit*
-- [`ManualCommitConsumerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/ManualCommitConsumerTemplate.java) — Consumer *At-Least-Once* con `commitSync()`
+- [`BasicConsumerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/BasicConsumerTemplate.java) — Consumer **None** con *Auto-Commit*
+- [`AtMostOnceConsumerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/AtMostOnceConsumerTemplate.java) — Consumer **At-Most-Once** (`commitSync` prima del processing)
+- [`ManualCommitConsumerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/ManualCommitConsumerTemplate.java) — Consumer **At-Least-Once** (`commitSync` dopo il processing)
 - [`TransactionalConsumerTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/TransactionalConsumerTemplate.java) — Consumer transazionale (`read_committed` vs `read_uncommitted`)
-- [`TransactionalForwarderTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/TransactionalForwarderTemplate.java) — Forwarder *Stateless* End-to-End Exactly-Once (`sendOffsetsToTransaction` + `seek`)
-- [`StatefulForwarderTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/StatefulForwarderTemplate.java) — Forwarder *Stateful* Fault-Tolerant EOS (recovery da topic compattato + `ConsumerRebalanceListener`)
+- [`BasicForwarderTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/BasicForwarderTemplate.java) — Forwarder **None** (Auto-Commit + Async Send)
+- [`AtMostOnceForwarderTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/AtMostOnceForwarderTemplate.java) — Forwarder **At-Most-Once** (Commit prima di forward + `retries=0`)
+- [`AtLeastOnceForwarderTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/AtLeastOnceForwarderTemplate.java) — Forwarder **At-Least-Once** (`flush()` prima di `commitSync()` + replay stateful fino a `committed()`)
+- [`TransactionalForwarderTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/TransactionalForwarderTemplate.java) — Forwarder *Stateless* **Exactly-Once** (`sendOffsetsToTransaction` + `seek`)
+- [`WindowedForwarderTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/WindowedForwarderTemplate.java) — Forwarder *Tumbling Window* **Exactly-Once**
+- [`StatefulForwarderTemplate`](./kafka-lab-template/src/main/java/com/polimi/kafka/template/StatefulForwarderTemplate.java) — Forwarder *Stateful* Fault-Tolerant **Exactly-Once** (recovery da topic compattato + `ConsumerRebalanceListener`)
 
 ---
 

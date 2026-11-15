@@ -14,6 +14,7 @@
     <modules>
         <module>lab/lab1</module>
         <module>lab/lab2/NSDS26_kafka_lab2</module>
+        <module>exam-2023/NSDS_kafka_eval</module>
         <module>exam-2024/NSDS24_kafka_eval_solutions</module>
         <module>kafka-lab-template</module>
         <module>kafka-exam</module>

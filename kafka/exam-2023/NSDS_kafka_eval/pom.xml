@@ -4,12 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>it.polimi.nsds.kafka</groupId>
-    <artifactId>eval</artifactId>
+    <groupId>com.polimi.nsds.kafka</groupId>
+    <artifactId>exam-2023</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>Kafka Evaluation Lab 2023</name>
+    <name>Kafka Eval 2023</name>
     <description>Apache Kafka Exam 2023 project (Producer, AtMostOncePrinter, PopularTopicConsumer)</description>
 
     <properties>

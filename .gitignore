@@ -12,3 +12,15 @@ out/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Node.js / Node-RED runtime files
+node_modules/
+**/node_modules/
+nodered/**/.config*.json
+nodered/**/.config*.json.backup
+nodered/**/flows*.json.backup
+nodered/**/context/
+nodered/**/data/
+nodered/**/counter.txt
+counter.txt
+
