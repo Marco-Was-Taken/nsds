@@ -19,8 +19,15 @@ node_modules/
 nodered/**/.config*.json
 nodered/**/.config*.json.backup
 nodered/**/flows*.json.backup
+nodered/**/.flows*.json.backup
+nodered/**/*flows_cred.json
+nodered/**/.flows_cred.json.backup
 nodered/**/context/
 nodered/**/data/
+nodered/**/dist-plugins/
+nodered/**/*.sqlite
+nodered/**/package-lock.json
 nodered/**/counter.txt
+nodered/**/log.txt
 counter.txt
-
+log.txt

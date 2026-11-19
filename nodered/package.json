@@ -4,7 +4,10 @@
   "description": "Node-RED workspace, templates, scripts and exam environment for NSDS (Politecnico di Milano)",
   "private": true,
   "scripts": {
-    "start:exam": "node-red -u ./nodered-exam ./nodered-exam/flows.json",
+    "start:exam": "node-red -p 1880 -u ./nodered-exam ./nodered-exam/flows.json",
+    "start:practice": "node-red -p 1881 -u ./nodered-practice ./nodered-practice/flows.json",
+    "start:lab1": "node-red -u ./lab/lab-userdir ./lab/lab1/flows.json",
+    "start:lab2": "node-red -u ./lab/lab-userdir ./lab/lab2/flows.json",
     "start:templates": "node-red -u ./nodered-lab-template ./nodered-lab-template/flows/all_templates_combined.json",
     "start:basics": "node-red -u ./nodered-lab-template ./nodered-lab-template/flows/01_basics_and_async.json",
     "start:functions": "node-red -u ./nodered-lab-template ./nodered-lab-template/flows/02_function_nodes_patterns.json",

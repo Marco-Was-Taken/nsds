@@ -1,0 +1,135 @@
+[
+    {
+        "id": "f5c0042935c02fc3",
+        "type": "chatbot-telegram-node",
+        "botname": "MarcoBot",
+        "polling": 1000,
+        "store": "",
+        "debug": false,
+        "skipMediaFiles": false,
+        "webHook": "",
+        "connectMode": "polling",
+        "storeMessages": true,
+        "enableMissionControl": false,
+        "inspectMessages": true,
+        "chatbotId": ""
+    },
+    {
+        "id": "98366721d07d67b2",
+        "type": "tab",
+        "label": "Exam2025",
+        "disabled": false,
+        "info": "Telegram Weather Bot (QUERY, TRACK, REPORT) using OpenWeatherMap and RedBot.",
+        "env": []
+    },
+    {
+        "id": "a3e1d62894a632fa",
+        "type": "chatbot-telegram-receive",
+        "z": "98366721d07d67b2",
+        "bot": "f5c0042935c02fc3",
+        "botProduction": "f5c0042935c02fc3",
+        "x": 150,
+        "y": 220,
+        "wires": [
+            [
+                "6ea4de9978e458bf"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "6ea4de9978e458bf",
+        "type": "function",
+        "z": "98366721d07d67b2",
+        "name": "Filter",
+        "func": "// Estrazione e tokenizzazione sicura del messaggio Telegram\nconst raw = typeof msg.payload?.content === \"string\" ? msg.payload.content.trim() : \"\";\nconst tokens = raw ? raw.split(/\\s+/) : [];\nconst command = (tokens[0] || \"\").toLowerCase();\n\nconst acceptedCommands = [\"query\", \"track\"];\nconst isValidQueryOrTrack = tokens.length >= 3 && acceptedCommands.includes(command);\nconst isValidReport = tokens.length === 1 && command === \"report\";\n\nif (!isValidQueryOrTrack && !isValidReport) {\n    msg.payload.message = \"I don't get what you're asking...\";\n    return [null, msg];\n}\n\n// Identificativo univoco utente (preferisce from.id di Telegram, fallback su userId/chatId)\nconst userId = String(msg.originalMessage?.from?.id ?? msg.payload?.userId ?? msg.payload?.chatId);\n\nif (command === \"query\") {\n    msg.location = {\n        city: tokens.slice(1, -1).join(\" \"),\n        country: tokens[tokens.length - 1]\n    };\n    return [msg, null];\n}\n\nif (command === \"track\") {\n    const queryCity = tokens.slice(1, -1).join(\" \");\n    const queryCountry = tokens[tokens.length - 1];\n\n    const allPrefs = context.get(\"userPrefs\") || {};\n    const userPrefs = allPrefs[userId] || [];\n\n    const alreadyTracked = userPrefs.some(\n        p => p.city.toLowerCase() === queryCity.toLowerCase() &&\n             p.country.toLowerCase() === queryCountry.toLowerCase()\n    );\n\n    if (!alreadyTracked) {\n        userPrefs.push({\n            city: queryCity,\n            country: queryCountry\n        });\n        allPrefs[userId] = userPrefs;\n        context.set(\"userPrefs\", allPrefs);\n    }\n\n    msg.payload.message = \"Tracking temperature for \" + queryCity + \"!\";\n    return [null, msg];\n}\n\nif (command === \"report\") {\n    const allPrefs = context.get(\"userPrefs\") || {};\n    const userPrefs = allPrefs[userId] || [];\n    const userQueryMsg = [];\n\n    for (const pref of userPrefs) {\n        const msgReport = RED.util.cloneMessage(msg);\n        msgReport.location = {\n            city: pref.city,\n            country: pref.country\n        };\n        userQueryMsg.push(msgReport);\n    }\n\n    return [userQueryMsg, null];\n}\n\nreturn [null, null];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 220,
+        "wires": [
+            [
+                "a434d9409efcf086"
+            ],
+            [
+                "e86d10cd68a7fe59"
+            ]
+        ]
+    },
+    {
+        "id": "a434d9409efcf086",
+        "type": "openweathermap",
+        "z": "98366721d07d67b2",
+        "name": "Temperature OW",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "",
+        "country": "",
+        "language": "en",
+        "x": 610,
+        "y": 160,
+        "wires": [
+            [
+                "8628c0d09120914c"
+            ]
+        ]
+    },
+    {
+        "id": "8628c0d09120914c",
+        "type": "function",
+        "z": "98366721d07d67b2",
+        "name": "MessageBuilder",
+        "func": "const city = msg.location?.city || msg.payload?.location || \"\";\nconst temperature = msg.payload.tempc;\n\nmsg.payload.message = \"The temperature in \" + city + \" is \" + temperature + \"C!\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 160,
+        "wires": [
+            [
+                "e86d10cd68a7fe59"
+            ]
+        ]
+    },
+    {
+        "id": "e86d10cd68a7fe59",
+        "type": "chatbot-message",
+        "z": "98366721d07d67b2",
+        "name": "ReplyMessage",
+        "message": [
+            {
+                "message": "{{payload.message}}"
+            }
+        ],
+        "language": "none",
+        "x": 1090,
+        "y": 220,
+        "wires": [
+            [
+                "457264504802e561"
+            ]
+        ]
+    },
+    {
+        "id": "457264504802e561",
+        "type": "chatbot-telegram-send",
+        "z": "98366721d07d67b2",
+        "bot": "f5c0042935c02fc3",
+        "botProduction": "f5c0042935c02fc3",
+        "track": false,
+        "passThrough": false,
+        "errorOutput": false,
+        "outputs": 0,
+        "x": 1320,
+        "y": 220,
+        "wires": []
+    }
+]

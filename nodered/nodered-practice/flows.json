@@ -1,0 +1,795 @@
+[
+    {
+        "id": "tab-practice-main",
+        "type": "tab",
+        "label": "Soluzione Gruppo (Pulita)",
+        "disabled": true,
+        "info": "Versione compatta (11 nodi) ispirata a group29 con tutte le correzioni applicate.",
+        "env": []
+    },
+    {
+        "id": "tab-my-version",
+        "type": "tab",
+        "label": "Mia Versione (Corretta)",
+        "disabled": true,
+        "info": "La tua architettura originale con RequestFilter, selettori e 4 filtri separati, corretta.\nDisabilitata di default per evitare conflitti di polling Telegram su MarcoBot: per testarla, disabilita l'altro tab e abilita questo (inserendo l'API key OpenWeatherMap nei nodi MilanOW e RomeOW di questo tab).",
+        "env": []
+    },
+    {
+        "id": "41c095663f8e5041",
+        "type": "tab",
+        "label": "Exam2024",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f5c0042935c02fc3",
+        "type": "chatbot-telegram-node",
+        "botname": "MarcoBot",
+        "polling": 1000,
+        "store": "",
+        "debug": false,
+        "skipMediaFiles": false,
+        "webHook": "",
+        "connectMode": "polling",
+        "storeMessages": true,
+        "enableMissionControl": false,
+        "inspectMessages": true,
+        "chatbotId": ""
+    },
+    {
+        "id": "b3dfed99dd20f4df",
+        "type": "chatbot-telegram-receive",
+        "z": "tab-practice-main",
+        "bot": "f5c0042935c02fc3",
+        "botProduction": "f5c0042935c02fc3",
+        "x": 130,
+        "y": 240,
+        "wires": [
+            [
+                "31e76de12a1404c1"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "31e76de12a1404c1",
+        "type": "function",
+        "z": "tab-practice-main",
+        "name": "Parser",
+        "func": "// Tokenizzazione sicura del messaggio Telegram\nconst raw = typeof msg.payload?.content === \"string\" ? msg.payload.content : \"\";\nconst tokens = raw.toLowerCase().match(/[a-z0-9]+/g) || [];\n\n// 1) Città\nlet city = null;\nif (tokens.includes(\"milan\") || tokens.includes(\"milano\")) {\n    city = \"Milano\";\n} else if (tokens.includes(\"rome\") || tokens.includes(\"roma\")) {\n    city = \"Rome\";\n}\n\n// 2) Tipo di query (controlliamo \"wind\" prima di \"forecast\")\nlet queryType = null;\nif (tokens.includes(\"wind\")) {\n    queryType = \"wind\";\n} else if (tokens.includes(\"weather\") || tokens.includes(\"forecast\")) {\n    queryType = \"weather\";\n}\n\n// 3) Giorni (1 = tomorrow, 2 = in two days)\nlet days = -1;\nif (tokens.includes(\"tomorrow\") || tokens.includes(\"one\") || tokens.includes(\"1\")) {\n    days = 1;\n} else if (tokens.includes(\"two\") || tokens.includes(\"2\")) {\n    days = 2;\n}\n\nif (city === null || queryType === null || days === -1) {\n    return [null, null, msg];\n}\n\nmsg.city = city;\nmsg.queryType = queryType;\nmsg.days = days;\n\nif (city === \"Milano\") {\n    return [msg, null, null];\n}\nreturn [null, msg, null];",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 240,
+        "wires": [
+            [
+                "68d91f24f042c336"
+            ],
+            [
+                "a494f56ac23b6dfd"
+            ],
+            [
+                "4eed3a0d3162b67f"
+            ]
+        ]
+    },
+    {
+        "id": "68d91f24f042c336",
+        "type": "openweathermap",
+        "z": "tab-practice-main",
+        "name": "MilanOW",
+        "wtype": "forecast",
+        "lon": "",
+        "lat": "",
+        "city": "Milan",
+        "country": "IT",
+        "language": "en",
+        "x": 620,
+        "y": 160,
+        "wires": [
+            [
+                "0cb9f75246938bc3"
+            ]
+        ]
+    },
+    {
+        "id": "a494f56ac23b6dfd",
+        "type": "openweathermap",
+        "z": "tab-practice-main",
+        "name": "RomeOW",
+        "wtype": "forecast",
+        "lon": "",
+        "lat": "",
+        "city": "Rome",
+        "country": "IT",
+        "language": "en",
+        "x": 620,
+        "y": 280,
+        "wires": [
+            [
+                "0cb9f75246938bc3"
+            ]
+        ]
+    },
+    {
+        "id": "0cb9f75246938bc3",
+        "type": "function",
+        "z": "tab-practice-main",
+        "name": "Filter",
+        "func": "const list = Array.isArray(msg.payload) ? msg.payload : [];\nif (list.length === 0) {\n    msg.payload = { reply: \"Sorry, weather forecast data is currently unavailable.\" };\n    return msg;\n}\n\n// Seleziona lo slot delle 12:00 UTC del giorno target (oggi + msg.days)\nconst target = new Date();\ntarget.setUTCDate(target.getUTCDate() + msg.days);\nconst targetDateStr = target.toISOString().slice(0, 10);\n\nconst entry =\n    list.find(item => item.dt_txt === `${targetDateStr} 12:00:00`) ||\n    list.find(item => item.dt_txt && item.dt_txt.startsWith(targetDateStr)) ||\n    list[Math.min(msg.days * 8 - 1, list.length - 1)];\n\nif (!entry) return null;\n\nconst currentValue =\n    msg.queryType === \"wind\"\n        ? entry.wind?.speed\n        : entry.weather?.[0]?.description;\n\nif (currentValue === undefined) return null;\n\n// Aggiorna contatore per tipo di query nel flow context\nconst counts = flow.get(\"queryCounts\") || { weather: 0, wind: 0 };\ncounts[msg.queryType] += 1;\nflow.set(\"queryCounts\", counts);\n\n// Confronta con l'ultimo valore chiesto per la stessa combinazione (città, tipo, data)\nconst key = `${msg.city}_${msg.queryType}_${targetDateStr}`;\nconst history = context.get(\"history\") || {};\nconst previousValue = history[key];\n\nlet changeNotice;\nif (previousValue === undefined) {\n    changeNotice = \"This is the first time I am asked this!\";\n} else if (previousValue === currentValue) {\n    changeNotice = \"It is the same as the last time I was asked!\";\n} else {\n    changeNotice = \"It changed since the last time I was asked!\";\n}\n\nhistory[key] = currentValue;\ncontext.set(\"history\", history);\n\n// Formatta la risposta\nlet answer;\nif (msg.queryType === \"wind\") {\n    const whenText = msg.days === 1 ? \"tomorrow\" : \"in two days\";\n    answer = `Expected wind speed in ${msg.city} ${whenText} is ${currentValue} m/s!`;\n} else {\n    answer = msg.days === 1\n        ? `Tomorrow's forecast for ${msg.city} is ${currentValue}!`\n        : `The forecast for ${msg.city} in two days is ${currentValue}!`;\n}\n\nmsg.payload = { reply: `${answer} ${changeNotice}` };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "context.set(\"history\", {});",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 240,
+        "wires": [
+            [
+                "50b65b5645e5d2c7"
+            ]
+        ]
+    },
+    {
+        "id": "50b65b5645e5d2c7",
+        "type": "chatbot-message",
+        "z": "tab-practice-main",
+        "name": "Output",
+        "message": [
+            {
+                "message": "{{payload.reply}}"
+            }
+        ],
+        "language": "none",
+        "x": 1080,
+        "y": 240,
+        "wires": [
+            [
+                "be5635c4b69004c0"
+            ]
+        ]
+    },
+    {
+        "id": "4eed3a0d3162b67f",
+        "type": "chatbot-message",
+        "z": "tab-practice-main",
+        "name": "Error",
+        "message": [
+            {
+                "message": "I don't get what you're asking... Ask for the weather forecast or wind speed in Milano or Rome tomorrow or in two days."
+            }
+        ],
+        "language": "none",
+        "x": 620,
+        "y": 380,
+        "wires": [
+            [
+                "be5635c4b69004c0"
+            ]
+        ]
+    },
+    {
+        "id": "be5635c4b69004c0",
+        "type": "chatbot-telegram-send",
+        "z": "tab-practice-main",
+        "bot": "f5c0042935c02fc3",
+        "botProduction": "f5c0042935c02fc3",
+        "track": false,
+        "passThrough": false,
+        "errorOutput": false,
+        "outputs": 0,
+        "x": 1320,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "1bc9c19cd722ccf3",
+        "type": "inject",
+        "z": "tab-practice-main",
+        "name": "Every 1 minute",
+        "props": [],
+        "repeat": "60",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 140,
+        "y": 520,
+        "wires": [
+            [
+                "8958f8483e1a2f6b"
+            ]
+        ]
+    },
+    {
+        "id": "8958f8483e1a2f6b",
+        "type": "function",
+        "z": "tab-practice-main",
+        "name": "Reset & format log",
+        "func": "const counts = flow.get(\"queryCounts\") || { weather: 0, wind: 0 };\nflow.set(\"queryCounts\", { weather: 0, wind: 0 });\n\nmsg.payload = `Weather: ${counts.weather}\\nWind: ${counts.wind}`;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "flow.set(\"queryCounts\", { weather: 0, wind: 0 });",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 520,
+        "wires": [
+            [
+                "0d4b9ca1be756d3a"
+            ]
+        ]
+    },
+    {
+        "id": "0d4b9ca1be756d3a",
+        "type": "file",
+        "z": "tab-practice-main",
+        "name": "Write log.txt",
+        "filename": "log.txt",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 650,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "my-tg-in",
+        "type": "chatbot-telegram-receive",
+        "z": "tab-my-version",
+        "bot": "f5c0042935c02fc3",
+        "botProduction": "f5c0042935c02fc3",
+        "x": 150,
+        "y": 320,
+        "wires": [
+            [
+                "my-tg-debug",
+                "my-req-filter"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "my-tg-debug",
+        "type": "debug",
+        "z": "tab-my-version",
+        "name": "TelegramBotDebug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 450,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "my-req-filter",
+        "type": "function",
+        "z": "tab-my-version",
+        "name": "RequestFilter",
+        "func": "let weatherCount = context.get(\"weatherCount\") || 0;\nlet windCount = context.get(\"windCount\") || 0;\n\nif (msg.topic === \"counterSave\") {\n    context.set(\"weatherCount\", 0);\n    context.set(\"windCount\", 0);\n    let msgCounter = {\n        _msgid: msg._msgid,\n        topic: msg.topic,\n        payload: `${new Date().toISOString()} | weather: ${weatherCount}, wind: ${windCount}`\n    };\n    return [null, null, null, msgCounter];\n}\n\n// Tokenizzazione sicura della stringa in ingresso\nconst raw = typeof msg.payload?.content === \"string\" ? msg.payload.content : \"\";\nconst tokens = raw.toLowerCase().match(/[a-z0-9]+/g) || [];\n\n// 1) Estrazione città\nlet city = null;\nif (tokens.includes(\"milan\") || tokens.includes(\"milano\")) {\n    city = \"Milan\";\n} else if (tokens.includes(\"rome\") || tokens.includes(\"roma\")) {\n    city = \"Rome\";\n}\n\n// 2) Estrazione tipo di query (controlliamo \"wind\" prima di \"forecast\")\nlet isWind = null;\nif (tokens.includes(\"wind\")) {\n    isWind = true;\n} else if (tokens.includes(\"weather\") || tokens.includes(\"forecast\")) {\n    isWind = false;\n}\n\n// 3) Estrazione giorni (1 = tomorrow, 2 = in two days)\nlet daysSelected = -1;\nif (tokens.includes(\"tomorrow\") || tokens.includes(\"one\") || tokens.includes(\"1\")) {\n    daysSelected = 1;\n} else if (tokens.includes(\"two\") || tokens.includes(\"2\")) {\n    daysSelected = 2;\n}\n\n// Se manca almeno un parametro -> uscita 3 (messaggio di fallback)\nif (city === null || isWind === null || daysSelected === -1) {\n    return [null, null, msg, null];\n}\n\n// Imposta i metadati per entrambi i rami (Milano e Roma) e incrementa il contatore giusto\nmsg.city = city;\nmsg.wind = isWind;\nmsg.daysSelected = daysSelected;\n\nif (isWind) {\n    context.set(\"windCount\", windCount + 1);\n} else {\n    context.set(\"weatherCount\", weatherCount + 1);\n}\n\nif (city === \"Milan\") {\n    return [msg, null, null, null];\n}\nreturn [null, msg, null, null];",
+        "outputs": 4,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "context.set(\"weatherCount\", 0);\ncontext.set(\"windCount\", 0);",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 360,
+        "wires": [
+            [
+                "my-milan-ow"
+            ],
+            [
+                "my-rome-ow"
+            ],
+            [
+                "my-escape-msg"
+            ],
+            [
+                "my-counter-file"
+            ]
+        ]
+    },
+    {
+        "id": "my-milan-ow",
+        "type": "openweathermap",
+        "z": "tab-my-version",
+        "name": "MilanOW",
+        "wtype": "forecast",
+        "lon": "",
+        "lat": "",
+        "city": "Milan",
+        "country": "Italy",
+        "language": "en",
+        "x": 700,
+        "y": 240,
+        "wires": [
+            [
+                "my-milan-selector"
+            ]
+        ]
+    },
+    {
+        "id": "my-rome-ow",
+        "type": "openweathermap",
+        "z": "tab-my-version",
+        "name": "RomeOW",
+        "wtype": "forecast",
+        "lon": "",
+        "lat": "",
+        "city": "Rome",
+        "country": "Italy",
+        "language": "en",
+        "x": 700,
+        "y": 400,
+        "wires": [
+            [
+                "my-rome-selector"
+            ]
+        ]
+    },
+    {
+        "id": "my-milan-selector",
+        "type": "function",
+        "z": "tab-my-version",
+        "name": "WindForecastMilanSelector",
+        "func": "if (msg.wind === true) {\n    return [msg, null];\n}\nelse if (msg.wind === false) {\n    return [null, msg];\n}\nreturn [null, null];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 960,
+        "y": 240,
+        "wires": [
+            [
+                "my-milan-wind"
+            ],
+            [
+                "my-milan-forecast"
+            ]
+        ]
+    },
+    {
+        "id": "my-rome-selector",
+        "type": "function",
+        "z": "tab-my-version",
+        "name": "WindForecastRomeSelector",
+        "func": "if (msg.wind === true) {\n    return [msg, null];\n}\nelse if (msg.wind === false) {\n    return [null, msg];\n}\nreturn [null, null];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 960,
+        "y": 400,
+        "wires": [
+            [
+                "my-rome-wind"
+            ],
+            [
+                "my-rome-forecast"
+            ]
+        ]
+    },
+    {
+        "id": "my-milan-wind",
+        "type": "function",
+        "z": "tab-my-version",
+        "name": "MilanWindFilter",
+        "func": "const list = Array.isArray(msg.payload) ? msg.payload : [];\nconst days = msg.daysSelected;\n\nconst target = new Date();\ntarget.setUTCDate(target.getUTCDate() + days);\nconst targetDateStr = target.toISOString().slice(0, 10);\n\nconst entry =\n    list.find(item => item.dt_txt === `${targetDateStr} 12:00:00`) ||\n    list.find(item => item.dt_txt && item.dt_txt.startsWith(targetDateStr)) ||\n    list[Math.min(days * 8 - 1, list.length - 1)];\n\nif (!entry || !entry.wind) return null;\n\nconst currentWind = entry.wind.speed;\nconst history = context.get(\"history\") || {};\nconst previousWind = history[targetDateStr];\n\nlet alertMsg;\nif (previousWind === undefined) {\n    alertMsg = \"This is the first time I am asked this!\";\n} else if (previousWind === currentWind) {\n    alertMsg = \"It is the same as the last time I was asked!\";\n} else {\n    alertMsg = \"It changed since the last time I was asked!\";\n}\n\nhistory[targetDateStr] = currentWind;\ncontext.set(\"history\", history);\n\nconst whenText = days === 1 ? \"tomorrow\" : \"in two days\";\nmsg.payload = {\n    description: `Expected wind speed in Milano ${whenText} is ${currentWind} m/s!`,\n    previousForecastAllert: alertMsg\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "context.set(\"history\", {});",
+        "finalize": "",
+        "libs": [],
+        "x": 1240,
+        "y": 180,
+        "wires": [
+            [
+                "my-forecast-msg"
+            ]
+        ]
+    },
+    {
+        "id": "my-milan-forecast",
+        "type": "function",
+        "z": "tab-my-version",
+        "name": "MilanForecastFilter",
+        "func": "const list = Array.isArray(msg.payload) ? msg.payload : [];\nconst days = msg.daysSelected;\n\nconst target = new Date();\ntarget.setUTCDate(target.getUTCDate() + days);\nconst targetDateStr = target.toISOString().slice(0, 10);\n\nconst entry =\n    list.find(item => item.dt_txt === `${targetDateStr} 12:00:00`) ||\n    list.find(item => item.dt_txt && item.dt_txt.startsWith(targetDateStr)) ||\n    list[Math.min(days * 8 - 1, list.length - 1)];\n\nif (!entry || !entry.weather || !entry.weather[0]) return null;\n\nconst currentForecast = entry.weather[0].description;\nconst history = context.get(\"history\") || {};\nconst previousForecast = history[targetDateStr];\n\nlet alertMsg;\nif (previousForecast === undefined) {\n    alertMsg = \"This is the first time I am asked this!\";\n} else if (previousForecast === currentForecast) {\n    alertMsg = \"It is the same as the last time I was asked!\";\n} else {\n    alertMsg = \"It changed since the last time I was asked!\";\n}\n\nhistory[targetDateStr] = currentForecast;\ncontext.set(\"history\", history);\n\nconst desc = days === 1\n    ? `Tomorrow's forecast for Milano is ${currentForecast}!`\n    : `The forecast for Milano in two days is ${currentForecast}!`;\n\nmsg.payload = {\n    description: desc,\n    previousForecastAllert: alertMsg\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "context.set(\"history\", {});",
+        "finalize": "",
+        "libs": [],
+        "x": 1250,
+        "y": 280,
+        "wires": [
+            [
+                "my-milan-debug",
+                "my-forecast-msg"
+            ]
+        ]
+    },
+    {
+        "id": "my-rome-wind",
+        "type": "function",
+        "z": "tab-my-version",
+        "name": "RomeWindFilter",
+        "func": "const list = Array.isArray(msg.payload) ? msg.payload : [];\nconst days = msg.daysSelected;\n\nconst target = new Date();\ntarget.setUTCDate(target.getUTCDate() + days);\nconst targetDateStr = target.toISOString().slice(0, 10);\n\nconst entry =\n    list.find(item => item.dt_txt === `${targetDateStr} 12:00:00`) ||\n    list.find(item => item.dt_txt && item.dt_txt.startsWith(targetDateStr)) ||\n    list[Math.min(days * 8 - 1, list.length - 1)];\n\nif (!entry || !entry.wind) return null;\n\nconst currentWind = entry.wind.speed;\nconst history = context.get(\"history\") || {};\nconst previousWind = history[targetDateStr];\n\nlet alertMsg;\nif (previousWind === undefined) {\n    alertMsg = \"This is the first time I am asked this!\";\n} else if (previousWind === currentWind) {\n    alertMsg = \"It is the same as the last time I was asked!\";\n} else {\n    alertMsg = \"It changed since the last time I was asked!\";\n}\n\nhistory[targetDateStr] = currentWind;\ncontext.set(\"history\", history);\n\nconst whenText = days === 1 ? \"tomorrow\" : \"in two days\";\nmsg.payload = {\n    description: `Expected wind speed in Rome ${whenText} is ${currentWind} m/s!`,\n    previousForecastAllert: alertMsg\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "context.set(\"history\", {});",
+        "finalize": "",
+        "libs": [],
+        "x": 1240,
+        "y": 380,
+        "wires": [
+            [
+                "my-forecast-msg",
+                "my-rome-wind-debug"
+            ]
+        ]
+    },
+    {
+        "id": "my-rome-forecast",
+        "type": "function",
+        "z": "tab-my-version",
+        "name": "RomeForecastFilter",
+        "func": "const list = Array.isArray(msg.payload) ? msg.payload : [];\nconst days = msg.daysSelected;\n\nconst target = new Date();\ntarget.setUTCDate(target.getUTCDate() + days);\nconst targetDateStr = target.toISOString().slice(0, 10);\n\nconst entry =\n    list.find(item => item.dt_txt === `${targetDateStr} 12:00:00`) ||\n    list.find(item => item.dt_txt && item.dt_txt.startsWith(targetDateStr)) ||\n    list[Math.min(days * 8 - 1, list.length - 1)];\n\nif (!entry || !entry.weather || !entry.weather[0]) return null;\n\nconst currentForecast = entry.weather[0].description;\nconst history = context.get(\"history\") || {};\nconst previousForecast = history[targetDateStr];\n\nlet alertMsg;\nif (previousForecast === undefined) {\n    alertMsg = \"This is the first time I am asked this!\";\n} else if (previousForecast === currentForecast) {\n    alertMsg = \"It is the same as the last time I was asked!\";\n} else {\n    alertMsg = \"It changed since the last time I was asked!\";\n}\n\nhistory[targetDateStr] = currentForecast;\ncontext.set(\"history\", history);\n\nconst desc = days === 1\n    ? `Tomorrow's forecast for Rome is ${currentForecast}!`\n    : `The forecast for Rome in two days is ${currentForecast}!`;\n\nmsg.payload = {\n    description: desc,\n    previousForecastAllert: alertMsg\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "context.set(\"history\", {});",
+        "finalize": "",
+        "libs": [],
+        "x": 1250,
+        "y": 480,
+        "wires": [
+            [
+                "my-forecast-msg",
+                "my-rome-debug"
+            ]
+        ]
+    },
+    {
+        "id": "my-forecast-msg",
+        "type": "chatbot-message",
+        "z": "tab-my-version",
+        "name": "ForecastMessage",
+        "message": [
+            {
+                "message": "{{payload.description}} {{payload.previousForecastAllert}}"
+            }
+        ],
+        "language": "none",
+        "x": 1550,
+        "y": 320,
+        "wires": [
+            [
+                "my-tg-out"
+            ]
+        ]
+    },
+    {
+        "id": "my-tg-out",
+        "type": "chatbot-telegram-send",
+        "z": "tab-my-version",
+        "bot": "f5c0042935c02fc3",
+        "botProduction": "f5c0042935c02fc3",
+        "track": false,
+        "passThrough": false,
+        "errorOutput": false,
+        "outputs": 0,
+        "x": 1820,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "my-escape-msg",
+        "type": "chatbot-message",
+        "z": "tab-my-version",
+        "name": "FallbackMessage",
+        "message": [
+            {
+                "message": "I don't get what you're asking..."
+            }
+        ],
+        "language": "none",
+        "x": 710,
+        "y": 540,
+        "wires": [
+            [
+                "my-tg-out-escape",
+                "my-escape-debug"
+            ]
+        ]
+    },
+    {
+        "id": "my-tg-out-escape",
+        "type": "chatbot-telegram-send",
+        "z": "tab-my-version",
+        "bot": "f5c0042935c02fc3",
+        "botProduction": "f5c0042935c02fc3",
+        "track": false,
+        "passThrough": false,
+        "errorOutput": false,
+        "outputs": 0,
+        "x": 990,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "my-counter-inject",
+        "type": "inject",
+        "z": "tab-my-version",
+        "name": "Every 1 minute",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "counterSave",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 460,
+        "wires": [
+            [
+                "my-req-filter"
+            ]
+        ]
+    },
+    {
+        "id": "my-counter-file",
+        "type": "file",
+        "z": "tab-my-version",
+        "name": "CounterFile",
+        "filename": "counter.txt",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 700,
+        "y": 660,
+        "wires": [
+            [
+                "my-write-debug"
+            ]
+        ]
+    },
+    {
+        "id": "my-milan-debug",
+        "type": "debug",
+        "z": "tab-my-version",
+        "name": "ForecastMilanFilterDebug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1570,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "my-rome-wind-debug",
+        "type": "debug",
+        "z": "tab-my-version",
+        "name": "RomeWindDebug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1550,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "my-rome-debug",
+        "type": "debug",
+        "z": "tab-my-version",
+        "name": "ForecastRomeFilterDebug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1570,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "my-escape-debug",
+        "type": "debug",
+        "z": "tab-my-version",
+        "name": "EscapeMsgDebug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 960,
+        "y": 510,
+        "wires": []
+    },
+    {
+        "id": "my-write-debug",
+        "type": "debug",
+        "z": "tab-my-version",
+        "name": "WriteDebug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 930,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "98366721d07d67b2",
+        "type": "tab",
+        "label": "Exam2025",
+        "disabled": false,
+        "info": "Telegram Weather Bot (QUERY, TRACK, REPORT) using OpenWeatherMap and RedBot.",
+        "env": []
+    },
+    {
+        "id": "a3e1d62894a632fa",
+        "type": "chatbot-telegram-receive",
+        "z": "98366721d07d67b2",
+        "bot": "f5c0042935c02fc3",
+        "botProduction": "f5c0042935c02fc3",
+        "x": 150,
+        "y": 220,
+        "wires": [
+            [
+                "6ea4de9978e458bf"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "6ea4de9978e458bf",
+        "type": "function",
+        "z": "98366721d07d67b2",
+        "name": "Filter",
+        "func": "// Estrazione e tokenizzazione sicura del messaggio Telegram\nconst raw = typeof msg.payload?.content === \"string\" ? msg.payload.content.trim() : \"\";\nconst tokens = raw ? raw.split(/\\s+/) : [];\nconst command = (tokens[0] || \"\").toLowerCase();\n\nconst acceptedCommands = [\"query\", \"track\"];\nconst isValidQueryOrTrack = tokens.length >= 3 && acceptedCommands.includes(command);\nconst isValidReport = tokens.length === 1 && command === \"report\";\n\nif (!isValidQueryOrTrack && !isValidReport) {\n    msg.payload.message = \"I don't get what you're asking...\";\n    return [null, msg];\n}\n\n// Identificativo univoco utente (preferisce from.id di Telegram, fallback su userId/chatId)\nconst userId = String(msg.originalMessage?.from?.id ?? msg.payload?.userId ?? msg.payload?.chatId);\n\nif (command === \"query\") {\n    msg.location = {\n        city: tokens.slice(1, -1).join(\" \"),\n        country: tokens[tokens.length - 1]\n    };\n    return [msg, null];\n}\n\nif (command === \"track\") {\n    const queryCity = tokens.slice(1, -1).join(\" \");\n    const queryCountry = tokens[tokens.length - 1];\n\n    const allPrefs = context.get(\"userPrefs\") || {};\n    const userPrefs = allPrefs[userId] || [];\n\n    const alreadyTracked = userPrefs.some(\n        p => p.city.toLowerCase() === queryCity.toLowerCase() &&\n             p.country.toLowerCase() === queryCountry.toLowerCase()\n    );\n\n    if (!alreadyTracked) {\n        userPrefs.push({\n            city: queryCity,\n            country: queryCountry\n        });\n        allPrefs[userId] = userPrefs;\n        context.set(\"userPrefs\", allPrefs);\n    }\n\n    msg.payload.message = \"Tracking temperature for \" + queryCity + \"!\";\n    return [null, msg];\n}\n\nif (command === \"report\") {\n    const allPrefs = context.get(\"userPrefs\") || {};\n    const userPrefs = allPrefs[userId] || [];\n    const userQueryMsg = [];\n\n    for (const pref of userPrefs) {\n        const msgReport = RED.util.cloneMessage(msg);\n        msgReport.location = {\n            city: pref.city,\n            country: pref.country\n        };\n        userQueryMsg.push(msgReport);\n    }\n\n    return [userQueryMsg, null];\n}\n\nreturn [null, null];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 220,
+        "wires": [
+            [
+                "a434d9409efcf086"
+            ],
+            [
+                "e86d10cd68a7fe59"
+            ]
+        ]
+    },
+    {
+        "id": "a434d9409efcf086",
+        "type": "openweathermap",
+        "z": "98366721d07d67b2",
+        "name": "Temperature OW",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "",
+        "country": "",
+        "language": "en",
+        "x": 610,
+        "y": 160,
+        "wires": [
+            [
+                "8628c0d09120914c"
+            ]
+        ]
+    },
+    {
+        "id": "8628c0d09120914c",
+        "type": "function",
+        "z": "98366721d07d67b2",
+        "name": "MessageBuilder",
+        "func": "const city = msg.location?.city || msg.payload?.location || \"\";\nconst temperature = msg.payload.tempc;\n\nmsg.payload.message = \"The temperature in \" + city + \" is \" + temperature + \"C!\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 160,
+        "wires": [
+            [
+                "e86d10cd68a7fe59"
+            ]
+        ]
+    },
+    {
+        "id": "e86d10cd68a7fe59",
+        "type": "chatbot-message",
+        "z": "98366721d07d67b2",
+        "name": "ReplyMessage",
+        "message": [
+            {
+                "message": "{{payload.message}}"
+            }
+        ],
+        "language": "none",
+        "x": 1090,
+        "y": 220,
+        "wires": [
+            [
+                "457264504802e561"
+            ]
+        ]
+    },
+    {
+        "id": "457264504802e561",
+        "type": "chatbot-telegram-send",
+        "z": "98366721d07d67b2",
+        "bot": "f5c0042935c02fc3",
+        "botProduction": "f5c0042935c02fc3",
+        "track": false,
+        "passThrough": false,
+        "errorOutput": false,
+        "outputs": 0,
+        "x": 1320,
+        "y": 220,
+        "wires": []
+    }
+]

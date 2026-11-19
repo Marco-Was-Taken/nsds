@@ -1,6 +1,7 @@
 # Node-RED Exam Workspace (`nodered-exam`)
 
-Modulo pulito pronto per gli esercizi di laboratorio e per l'esame di **Node-RED**.
+Modulo pulito e isolato pronto esclusivamente per l'esame di **Node-RED**.
+*(Per i laboratori usa `Node-RED Lab 1` / `Node-RED Lab 2`; per esercitarti con altri esercizi usa `Node-RED Practice (Exercises)` su `http://localhost:1881`.)*
 
 ## Avvio Rapido
 

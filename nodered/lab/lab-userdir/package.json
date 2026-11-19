@@ -1,0 +1,10 @@
+{
+    "name": "nsds-nodered-labs",
+    "description": "Isolated Node-RED userDir for Lab 1 and Lab 2",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+        "node-red-contrib-chatbot": "^2.0.8",
+        "node-red-node-openweathermap": "~1.0.1"
+    }
+}

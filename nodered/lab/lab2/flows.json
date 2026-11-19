@@ -1,0 +1,940 @@
+[
+    {
+        "id": "tab-lab2-example",
+        "type": "tab",
+        "label": "Lab 2 - Example",
+        "disabled": false,
+        "info": "Generic starter example for Node-RED Lab 2 covering:\n1) UDP + JSON serialization + flow context\n2) MQTT Pub/Sub (localhost:1883) + persistent file context\n3) node-red-contrib-chatbot rules & message formatting",
+        "env": []
+    },
+    {
+        "id": "tab-lab2-telegram",
+        "type": "tab",
+        "label": "Lab 2 - Telegram Template",
+        "disabled": true,
+        "info": "Ready-to-use Telegram Bot template using node-red-contrib-chatbot.\nDisabled by default: configure your Bot Token in 'Lab2TelegramBot', then enable this tab and Deploy.",
+        "env": []
+    },
+    {
+        "id": "tab-lab2-workspace",
+        "type": "tab",
+        "label": "Lab 2 - Exercises",
+        "disabled": false,
+        "info": "Clean workspace tab for your Lab 2 exercises.",
+        "env": []
+    },
+    {
+        "id": "0f878789f06582b5",
+        "type": "tab",
+        "label": "Exercise 5-0",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "mqtt-broker-lab2-local",
+        "type": "mqtt-broker",
+        "name": "Local Mosquitto (localhost:1883)",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "mqtt-broker-lab2-neslab",
+        "type": "mqtt-broker",
+        "name": "NESLab MQTT (mqtt.neslab.it:3200)",
+        "broker": "mqtt.neslab.it",
+        "port": "3200",
+        "clientid": "",
+        "autoConnect": false,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "bot-tg-lab2-template",
+        "type": "chatbot-telegram-node",
+        "botname": "MarcoNSDSBot",
+        "polling": "1000",
+        "store": "",
+        "debug": false,
+        "skipMediaFiles": false,
+        "webHook": "",
+        "connectMode": "polling",
+        "storeMessages": false,
+        "enableMissionControl": false,
+        "inspectMessages": false,
+        "chatbotId": ""
+    },
+    {
+        "id": "comment-lab2-udp",
+        "type": "comment",
+        "z": "tab-lab2-example",
+        "name": "1) UDP + JSON Serialization + Flow Context (127.0.0.1:7777)",
+        "info": "",
+        "x": 260,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "inj-lab2-udp",
+        "type": "inject",
+        "z": "tab-lab2-example",
+        "name": "Send UDP Telemetry",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "fn-lab2-udp-build"
+            ]
+        ]
+    },
+    {
+        "id": "fn-lab2-udp-build",
+        "type": "function",
+        "z": "tab-lab2-example",
+        "name": "Build Telemetry Object",
+        "func": "msg.payload = {\n    sensor: \"lab2-udp-sim\",\n    temp: Number((20 + Math.random() * 5).toFixed(2)),\n    ts: msg.payload\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 100,
+        "wires": [
+            [
+                "json-lab2-udp-str"
+            ]
+        ]
+    },
+    {
+        "id": "json-lab2-udp-str",
+        "type": "json",
+        "z": "tab-lab2-example",
+        "name": "To JSON String",
+        "property": "payload",
+        "action": "str",
+        "pretty": false,
+        "x": 600,
+        "y": 100,
+        "wires": [
+            [
+                "udp-lab2-out"
+            ]
+        ]
+    },
+    {
+        "id": "udp-lab2-out",
+        "type": "udp out",
+        "z": "tab-lab2-example",
+        "name": "UDP Out (127.0.0.1:7777)",
+        "addr": "127.0.0.1",
+        "iface": "",
+        "port": "7777",
+        "ipv": "udp4",
+        "outport": "",
+        "base64": false,
+        "multicast": "false",
+        "x": 850,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "udp-lab2-in",
+        "type": "udp in",
+        "z": "tab-lab2-example",
+        "name": "UDP In (:7777)",
+        "iface": "",
+        "port": "7777",
+        "ipv": "udp4",
+        "multicast": "false",
+        "group": "",
+        "datatype": "utf8",
+        "x": 130,
+        "y": 160,
+        "wires": [
+            [
+                "json-lab2-udp-obj"
+            ]
+        ]
+    },
+    {
+        "id": "json-lab2-udp-obj",
+        "type": "json",
+        "z": "tab-lab2-example",
+        "name": "To JS Object",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 350,
+        "y": 160,
+        "wires": [
+            [
+                "fn-lab2-udp-store"
+            ]
+        ]
+    },
+    {
+        "id": "fn-lab2-udp-store",
+        "type": "function",
+        "z": "tab-lab2-example",
+        "name": "Save to Flow Context",
+        "func": "flow.set(\"lastUdpTelemetry\", msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 160,
+        "wires": [
+            [
+                "dbg-lab2-udp-in"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-lab2-udp-in",
+        "type": "debug",
+        "z": "tab-lab2-example",
+        "name": "UDP Received",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 820,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "comment-lab2-mqtt",
+        "type": "comment",
+        "z": "tab-lab2-example",
+        "name": "2) MQTT Pub/Sub (localhost:1883, QoS 1) + Persistent File Context",
+        "info": "",
+        "x": 270,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "inj-lab2-mqtt",
+        "type": "inject",
+        "z": "tab-lab2-example",
+        "name": "Publish MQTT Event",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 300,
+        "wires": [
+            [
+                "fn-lab2-mqtt-build"
+            ]
+        ]
+    },
+    {
+        "id": "fn-lab2-mqtt-build",
+        "type": "function",
+        "z": "tab-lab2-example",
+        "name": "Build MQTT Event",
+        "func": "msg.topic = \"nsds/lab2/events\";\nmsg.payload = {\n    source: \"lab2-mqtt-sim\",\n    temp: Number((21 + Math.random() * 6).toFixed(2)),\n    ts: msg.payload\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 300,
+        "wires": [
+            [
+                "mqtt-lab2-out"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt-lab2-out",
+        "type": "mqtt out",
+        "z": "tab-lab2-example",
+        "name": "MQTT Out (localhost:1883)",
+        "topic": "",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "mqtt-broker-lab2-local",
+        "x": 640,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "mqtt-lab2-in",
+        "type": "mqtt in",
+        "z": "tab-lab2-example",
+        "name": "MQTT In (nsds/lab2/#)",
+        "topic": "nsds/lab2/#",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "mqtt-broker-lab2-local",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 160,
+        "y": 360,
+        "wires": [
+            [
+                "fn-lab2-mqtt-store"
+            ]
+        ]
+    },
+    {
+        "id": "fn-lab2-mqtt-store",
+        "type": "function",
+        "z": "tab-lab2-example",
+        "name": "Count (file) & Save State",
+        "func": "const count = (context.get(\"mqttCount\", \"file\") || 0) + 1;\ncontext.set(\"mqttCount\", count, \"file\");\nflow.set(\"lastMqttEvent\", msg.payload);\nmsg.payload = {\n    count: count,\n    topic: msg.topic,\n    event: msg.payload\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 360,
+        "wires": [
+            [
+                "dbg-lab2-mqtt-in"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-lab2-mqtt-in",
+        "type": "debug",
+        "z": "tab-lab2-example",
+        "name": "MQTT Received",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 680,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "comment-lab2-chatbot",
+        "type": "comment",
+        "z": "tab-lab2-example",
+        "name": "3) Chatbot Rules & Reply Formatting (node-red-contrib-chatbot, local test)",
+        "info": "",
+        "x": 290,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "inj-lab2-chat-status",
+        "type": "inject",
+        "z": "tab-lab2-example",
+        "name": "Simulate /status",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "/status",
+        "payloadType": "str",
+        "x": 140,
+        "y": 500,
+        "wires": [
+            [
+                "fn-lab2-chat-prep"
+            ]
+        ]
+    },
+    {
+        "id": "inj-lab2-chat-other",
+        "type": "inject",
+        "z": "tab-lab2-example",
+        "name": "Simulate /help",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "/help",
+        "payloadType": "str",
+        "x": 140,
+        "y": 560,
+        "wires": [
+            [
+                "fn-lab2-chat-prep"
+            ]
+        ]
+    },
+    {
+        "id": "fn-lab2-chat-prep",
+        "type": "function",
+        "z": "tab-lab2-example",
+        "name": "Attach Chat Context",
+        "func": "const text = String(msg.payload || \"\");\nmsg.originalMessage = {\n    chat: { id: \"lab2-demo\" },\n    transport: \"telegram\"\n};\nmsg.chat = function () {\n    return {\n        get: function () { return null; },\n        set: function () {}\n    };\n};\nmsg.payload = {\n    type: \"message\",\n    content: text,\n    chatId: \"lab2-demo\",\n    inbound: true\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 530,
+        "wires": [
+            [
+                "cb-rules-lab2"
+            ]
+        ]
+    },
+    {
+        "id": "cb-rules-lab2",
+        "type": "chatbot-rules",
+        "z": "tab-lab2-example",
+        "name": "Route Command",
+        "rules": [
+            {
+                "type": "command",
+                "command": "/status"
+            },
+            {
+                "type": "catchAll"
+            }
+        ],
+        "outputs": 2,
+        "x": 570,
+        "y": 530,
+        "wires": [
+            [
+                "fn-lab2-chat-state"
+            ],
+            [
+                "cb-msg-lab2-help"
+            ]
+        ]
+    },
+    {
+        "id": "fn-lab2-chat-state",
+        "type": "function",
+        "z": "tab-lab2-example",
+        "name": "Read Flow State",
+        "func": "const lastUdp = flow.get(\"lastUdpTelemetry\");\nconst lastMqtt = flow.get(\"lastMqttEvent\");\nconst udpStr = lastUdp ? `${lastUdp.temp}C` : \"N/A\";\nconst mqttStr = lastMqtt ? `${lastMqtt.temp}C` : \"N/A\";\nmsg.payload = Object.assign({}, msg.payload, {\n    summary: `UDP=${udpStr}, MQTT=${mqttStr}`\n});\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 500,
+        "wires": [
+            [
+                "cb-msg-lab2-status"
+            ]
+        ]
+    },
+    {
+        "id": "cb-msg-lab2-status",
+        "type": "chatbot-message",
+        "z": "tab-lab2-example",
+        "name": "Status Reply",
+        "message": [
+            {
+                "message": "Status OK - {{payload.summary}}"
+            }
+        ],
+        "language": "none",
+        "x": 980,
+        "y": 500,
+        "wires": [
+            [
+                "fn-lab2-chat-record",
+                "dbg-lab2-chat-out"
+            ]
+        ]
+    },
+    {
+        "id": "cb-msg-lab2-help",
+        "type": "chatbot-message",
+        "z": "tab-lab2-example",
+        "name": "Fallback Reply",
+        "message": [
+            {
+                "message": "Comando non riconosciuto. Usa /status"
+            }
+        ],
+        "language": "none",
+        "x": 800,
+        "y": 560,
+        "wires": [
+            [
+                "fn-lab2-chat-record",
+                "dbg-lab2-chat-out"
+            ]
+        ]
+    },
+    {
+        "id": "fn-lab2-chat-record",
+        "type": "function",
+        "z": "tab-lab2-example",
+        "name": "Save Last Reply",
+        "func": "flow.set(\"lastChatReply\", msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1170,
+        "y": 530,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "dbg-lab2-chat-out",
+        "type": "debug",
+        "z": "tab-lab2-example",
+        "name": "Chatbot Reply",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 1170,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "comment-lab2-tg-info",
+        "type": "comment",
+        "z": "tab-lab2-telegram",
+        "name": "Telegram Bot Template: Inserisci il Token in Lab2TelegramBot, abilita questo Tab e premi Deploy",
+        "info": "",
+        "x": 350,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "tg-recv-lab2",
+        "type": "chatbot-telegram-receive",
+        "z": "tab-lab2-telegram",
+        "bot": "bot-tg-lab2-template",
+        "botProduction": "bot-tg-lab2-template",
+        "x": 150,
+        "y": 140,
+        "wires": [
+            [
+                "tg-rules-lab2"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "tg-rules-lab2",
+        "type": "chatbot-rules",
+        "z": "tab-lab2-telegram",
+        "name": "Commands (/start, /status)",
+        "rules": [
+            {
+                "type": "command",
+                "command": "/start"
+            },
+            {
+                "type": "command",
+                "command": "/status"
+            },
+            {
+                "type": "catchAll"
+            }
+        ],
+        "outputs": 3,
+        "x": 390,
+        "y": 140,
+        "wires": [
+            [
+                "tg-msg-start"
+            ],
+            [
+                "tg-msg-status"
+            ],
+            [
+                "tg-msg-fallback"
+            ]
+        ]
+    },
+    {
+        "id": "tg-msg-start",
+        "type": "chatbot-message",
+        "z": "tab-lab2-telegram",
+        "name": "Welcome",
+        "message": [
+            {
+                "message": "Ciao! Bot Lab 2 attivo. Usa /status"
+            }
+        ],
+        "language": "none",
+        "x": 650,
+        "y": 100,
+        "wires": [
+            [
+                "tg-send-lab2"
+            ]
+        ]
+    },
+    {
+        "id": "tg-msg-status",
+        "type": "chatbot-message",
+        "z": "tab-lab2-telegram",
+        "name": "Status",
+        "message": [
+            {
+                "message": "Sistema online."
+            }
+        ],
+        "language": "none",
+        "x": 650,
+        "y": 140,
+        "wires": [
+            [
+                "tg-send-lab2"
+            ]
+        ]
+    },
+    {
+        "id": "tg-msg-fallback",
+        "type": "chatbot-message",
+        "z": "tab-lab2-telegram",
+        "name": "Fallback",
+        "message": [
+            {
+                "message": "Comando non riconosciuto. Prova /start o /status"
+            }
+        ],
+        "language": "none",
+        "x": 650,
+        "y": 180,
+        "wires": [
+            [
+                "tg-send-lab2"
+            ]
+        ]
+    },
+    {
+        "id": "tg-send-lab2",
+        "type": "chatbot-telegram-send",
+        "z": "tab-lab2-telegram",
+        "bot": "bot-tg-lab2-template",
+        "botProduction": "bot-tg-lab2-template",
+        "track": false,
+        "passThrough": false,
+        "errorOutput": false,
+        "outputs": 0,
+        "x": 890,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "comment-lab2-ws",
+        "type": "comment",
+        "z": "tab-lab2-workspace",
+        "name": "Spazio pulito per gli esercizi del Lab 2",
+        "info": "",
+        "x": 210,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "a27a526e075ef680",
+        "type": "chatbot-telegram-receive",
+        "z": "tab-lab2-workspace",
+        "bot": "bot-tg-lab2-template",
+        "botProduction": "bot-tg-lab2-template",
+        "x": 350,
+        "y": 360,
+        "wires": [
+            [
+                "9f5ac4a8342d2210"
+            ],
+            [
+                "68924e190af0e63e"
+            ]
+        ]
+    },
+    {
+        "id": "9f5ac4a8342d2210",
+        "type": "debug",
+        "z": "tab-lab2-workspace",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "68924e190af0e63e",
+        "type": "chatbot-telegram-send",
+        "z": "tab-lab2-workspace",
+        "bot": "bot-tg-lab2-template",
+        "botProduction": "bot-tg-lab2-template",
+        "track": false,
+        "passThrough": true,
+        "errorOutput": false,
+        "outputs": 1,
+        "x": 790,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e807c082b0b6d000",
+        "type": "chatbot-telegram-receive",
+        "z": "0f878789f06582b5",
+        "bot": "bot-tg-lab2-template",
+        "botProduction": "bot-tg-lab2-template",
+        "x": 130,
+        "y": 140,
+        "wires": [
+            [
+                "5184967ff9bf82a8",
+                "ae42b865aecb52b5"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "479846ca84a0d730",
+        "type": "chatbot-telegram-send",
+        "z": "0f878789f06582b5",
+        "bot": "bot-tg-lab2-template",
+        "botProduction": "bot-tg-lab2-template",
+        "track": false,
+        "passThrough": false,
+        "errorOutput": false,
+        "outputs": 0,
+        "x": 690,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "5184967ff9bf82a8",
+        "type": "debug",
+        "z": "0f878789f06582b5",
+        "name": "Show Incoming Msg!",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 540,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "ae42b865aecb52b5",
+        "type": "function",
+        "z": "0f878789f06582b5",
+        "name": "Compute Answer",
+        "func": "if(msg.payload.content == \"What is the temperature in Milan?\"){\n    return [msg, null]\n}\nelse {\n    msg.payload.content = \"I don't get what you're asking...\";\n}\ndelete msg.ts;\ndelete msg.transport;\nmsg.payload.inbound = false;\nmsg.payload.fallback = null;\n\nreturn [null, msg];",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 240,
+        "wires": [
+            [
+                "1739b8d338000a82"
+            ],
+            [
+                "479846ca84a0d730"
+            ]
+        ]
+    },
+    {
+        "id": "1739b8d338000a82",
+        "type": "openweathermap",
+        "z": "0f878789f06582b5",
+        "name": "MilanOW",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "Milano",
+        "country": "Italia",
+        "language": "en",
+        "x": 780,
+        "y": 200,
+        "wires": [
+            [
+                "8cb10e5aa09d581c",
+                "c0eae1676a6e0c26"
+            ]
+        ]
+    },
+    {
+        "id": "ce324d58a2390778",
+        "type": "chatbot-telegram-send",
+        "z": "0f878789f06582b5",
+        "bot": "bot-tg-lab2-template",
+        "botProduction": "bot-tg-lab2-template",
+        "track": false,
+        "passThrough": false,
+        "errorOutput": false,
+        "outputs": 0,
+        "x": 1310,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "8cb10e5aa09d581c",
+        "type": "debug",
+        "z": "0f878789f06582b5",
+        "name": "Show Incoming Msg!",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1040,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "c0eae1676a6e0c26",
+        "type": "chatbot-message",
+        "z": "0f878789f06582b5",
+        "name": "WeatherResponse",
+        "message": [
+            {
+                "message": "The current temperature in Milan is {{payload.tempc}}°C (min {{payload.temp_minc}}°C, max {{payload.temp_maxc}}°C)"
+            }
+        ],
+        "language": "",
+        "x": 1050,
+        "y": 280,
+        "wires": [
+            [
+                "ce324d58a2390778",
+                "4533a13970d217da"
+            ]
+        ]
+    },
+    {
+        "id": "4533a13970d217da",
+        "type": "debug",
+        "z": "0f878789f06582b5",
+        "name": "ResponseDebug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1290,
+        "y": 200,
+        "wires": []
+    }
+]

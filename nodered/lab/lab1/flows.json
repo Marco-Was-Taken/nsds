@@ -1,0 +1,798 @@
+[
+    {
+        "id": "8e9c892fa28a5f30",
+        "type": "tab",
+        "label": "Lab1.1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "a1c3e31ef74fb444",
+        "type": "tab",
+        "label": "Lab1.2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "2ca69e8e8a979279",
+        "type": "tab",
+        "label": "Lab1.3",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "tab-lab1-ex0",
+        "type": "tab",
+        "label": "Ex 0 - Warm Up",
+        "disabled": false,
+        "info": "Node-RED Lab 1 - Exercise 0 (Warm Up): OpenWeatherMap for Milan, IT."
+    },
+    {
+        "id": "a3dd9f384493be36",
+        "type": "tab",
+        "label": "Lab1.4",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "1e27afcb11722f87",
+        "type": "tab",
+        "label": "Lab1.5",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "a385d51087b49d7d",
+        "type": "tab",
+        "label": "Lab1.6",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "375be534db05c989",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "mqtt.neslab.it",
+        "port": "3200",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "4122ee301a84fe9e",
+        "type": "openweathermap",
+        "z": "8e9c892fa28a5f30",
+        "name": "OW MIlan",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "Milan",
+        "country": "Italia",
+        "language": "en",
+        "x": 420,
+        "y": 240,
+        "wires": [
+            [
+                "9ddbd509502f5d7b"
+            ]
+        ]
+    },
+    {
+        "id": "0e40117c3c2357cd",
+        "type": "inject",
+        "z": "8e9c892fa28a5f30",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 190,
+        "y": 240,
+        "wires": [
+            [
+                "4122ee301a84fe9e"
+            ]
+        ]
+    },
+    {
+        "id": "9ddbd509502f5d7b",
+        "type": "function",
+        "z": "8e9c892fa28a5f30",
+        "name": "AverageSetting",
+        "func": "const newTemp = msg.payload.tempc;\nconst oldTemp = context.get(\"oldTemp\");\ncontext.set(\"oldTemp\", newTemp);\n\nlet average = newTemp;\nif (oldTemp !== undefined) {\n    average = (oldTemp + newTemp) / 2;\n}\n\nreturn {\n    _msgid: msg._msgid,\n    topic: msg.topic,\n    payload: average\n};",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 340,
+        "wires": [
+            [
+                "b5176421cdc94be6",
+                "25b1e84a882ef6f8"
+            ]
+        ]
+    },
+    {
+        "id": "b5176421cdc94be6",
+        "type": "file",
+        "z": "8e9c892fa28a5f30",
+        "name": "Average",
+        "filename": "C:\\Users\\marco\\Documents\\GitHub\\nsds\\nodered\\lab\\lab1\\data\\average.txt",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 900,
+        "y": 440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "25b1e84a882ef6f8",
+        "type": "debug",
+        "z": "8e9c892fa28a5f30",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 940,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "0b65943d23bfc93c",
+        "type": "file in",
+        "z": "a1c3e31ef74fb444",
+        "name": "Average",
+        "filename": "C:\\Users\\marco\\Documents\\GitHub\\nsds\\nodered\\lab\\lab1\\data\\average.txt",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 440,
+        "y": 300,
+        "wires": [
+            [
+                "f6e68b89d1196782"
+            ]
+        ]
+    },
+    {
+        "id": "f8d3bc27540e4b38",
+        "type": "inject",
+        "z": "a1c3e31ef74fb444",
+        "name": "clock",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "120",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 260,
+        "wires": [
+            [
+                "0b65943d23bfc93c"
+            ]
+        ]
+    },
+    {
+        "id": "f6e68b89d1196782",
+        "type": "debug",
+        "z": "a1c3e31ef74fb444",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "dfa4089c57a61a34",
+        "type": "inject",
+        "z": "2ca69e8e8a979279",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 290,
+        "y": 320,
+        "wires": [
+            [
+                "a71da094991c7add"
+            ]
+        ]
+    },
+    {
+        "id": "a71da094991c7add",
+        "type": "file in",
+        "z": "2ca69e8e8a979279",
+        "name": "Average",
+        "filename": "C:\\Users\\marco\\Documents\\GitHub\\nsds\\nodered\\lab\\lab1\\data\\average.txt",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 540,
+        "y": 400,
+        "wires": [
+            [
+                "b03e86518df32725"
+            ]
+        ]
+    },
+    {
+        "id": "b03e86518df32725",
+        "type": "function",
+        "z": "2ca69e8e8a979279",
+        "name": "AllertFilter",
+        "func": "let average = msg.payload;\n\nif(average > 10){\n    return msg \n}\n\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 320,
+        "wires": [
+            [
+                "a412c029bf1a2263"
+            ]
+        ]
+    },
+    {
+        "id": "a412c029bf1a2263",
+        "type": "debug",
+        "z": "2ca69e8e8a979279",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1000,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "comment-lab1-ex0",
+        "type": "comment",
+        "z": "tab-lab1-ex0",
+        "name": "Lab 1 - Ex 0: OpenWeatherMap (Milan, IT) + Temperature Threshold (15°C)",
+        "info": "1. Click the manual inject button to inspect msg.payload from OpenWeatherMap.\n2. The lower branch checks msg.payload.tempc against threshold 15°C and prints \"high\" or \"low\".\n\nAPI Key (from Lab 1 slides): 2caa90098525566a5c251ebb92abd882",
+        "x": 290,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "inj-lab1-ex0-manual",
+        "type": "inject",
+        "z": "tab-lab1-ex0",
+        "name": "Trigger Manually",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 140,
+        "wires": [
+            [
+                "owm-lab1-ex0-milan"
+            ]
+        ]
+    },
+    {
+        "id": "owm-lab1-ex0-milan",
+        "type": "openweathermap",
+        "z": "tab-lab1-ex0",
+        "name": "Milan Weather",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "Milan",
+        "country": "IT",
+        "language": "en",
+        "x": 360,
+        "y": 140,
+        "wires": [
+            [
+                "dbg-lab1-ex0-raw",
+                "sw-lab1-ex0-temp"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-lab1-ex0-raw",
+        "type": "debug",
+        "z": "tab-lab1-ex0",
+        "name": "Inspect OpenWeather Output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "sw-lab1-ex0-temp",
+        "type": "switch",
+        "z": "tab-lab1-ex0",
+        "name": "tempc > 15°C?",
+        "property": "payload.tempc",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gt",
+                "v": "15",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 560,
+        "y": 220,
+        "wires": [
+            [
+                "chg-lab1-ex0-high"
+            ],
+            [
+                "chg-lab1-ex0-low"
+            ]
+        ]
+    },
+    {
+        "id": "chg-lab1-ex0-high",
+        "type": "change",
+        "z": "tab-lab1-ex0",
+        "name": "Set \"high\"",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "high",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 190,
+        "wires": [
+            [
+                "dbg-lab1-ex0-level"
+            ]
+        ]
+    },
+    {
+        "id": "chg-lab1-ex0-low",
+        "type": "change",
+        "z": "tab-lab1-ex0",
+        "name": "Set \"low\"",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "low",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 250,
+        "wires": [
+            [
+                "dbg-lab1-ex0-level"
+            ]
+        ]
+    },
+    {
+        "id": "dbg-lab1-ex0-level",
+        "type": "debug",
+        "z": "tab-lab1-ex0",
+        "name": "Temperature Level (high/low)",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 990,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "2375f62eee9f5519",
+        "type": "mqtt in",
+        "z": "a3dd9f384493be36",
+        "name": "mqttPolimi",
+        "topic": "neslabpolimi/smartcity/milan",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "375be534db05c989",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 300,
+        "y": 340,
+        "wires": [
+            [
+                "45720dabe44037ee",
+                "89e530119d0c85e3"
+            ]
+        ]
+    },
+    {
+        "id": "45720dabe44037ee",
+        "type": "function",
+        "z": "a3dd9f384493be36",
+        "name": "Track Max Values",
+        "func": "if (typeof msg.payload === \"string\") {\n    try {\n        msg.payload = JSON.parse(msg.payload);\n    } catch (e) {\n        return null;\n    }\n}\n\nconst fields = msg.payload && msg.payload.fields;\nif (!fields) {\n    return null;\n}\n\nfunction updateMax(key, rawVal) {\n    if (rawVal === undefined || rawVal === null) return false;\n    const val = Number(rawVal);\n    if (Number.isNaN(val)) return false;\n\n    const currentMax = context.get(key) ?? 0;\n    if (val > currentMax) {\n        context.set(key, val);\n        return true;\n    }\n    return false;\n}\n\nlet changed = false;\nif (updateMax(\"maxTemp\", fields.temperature)) changed = true;\nif (updateMax(\"maxHum\",  fields.humidity))    changed = true;\nif (updateMax(\"maxPm25\", fields.pm25))        changed = true;\nif (updateMax(\"maxPm10\", fields.pm10))        changed = true;\n\nif (!changed) {\n    return null;\n}\n\nmsg.payload = {\n    temperature: context.get(\"maxTemp\") ?? 0,\n    humidity:    context.get(\"maxHum\")  ?? 0,\n    pm25:        context.get(\"maxPm25\") ?? 0,\n    pm10:        context.get(\"maxPm10\") ?? 0\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 340,
+        "wires": [
+            [
+                "dbg-lab1-ex4-max"
+            ]
+        ]
+    },
+    {
+        "id": "89e530119d0c85e3",
+        "type": "debug",
+        "z": "a3dd9f384493be36",
+        "name": "Raw MQTT (toggle)",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "dbg-lab1-ex4-max",
+        "type": "debug",
+        "z": "a3dd9f384493be36",
+        "name": "Max Values",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 840,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "92d318b9bbf747be",
+        "type": "http request",
+        "z": "1e27afcb11722f87",
+        "name": "WeatherHttpRequest",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=45.4643&longitude=9.1895&current=alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,ragweed_pollen&forecast_days=1",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 540,
+        "y": 340,
+        "wires": [
+            [
+                "a566468dfc9f0aab",
+                "f8ba0e479114c35f"
+            ]
+        ]
+    },
+    {
+        "id": "426e97278779e033",
+        "type": "inject",
+        "z": "1e27afcb11722f87",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 190,
+        "y": 340,
+        "wires": [
+            [
+                "92d318b9bbf747be"
+            ]
+        ]
+    },
+    {
+        "id": "ca242e35d19944b1",
+        "type": "file",
+        "z": "1e27afcb11722f87",
+        "name": "LogData",
+        "filename": "C:\\Users\\marco\\Documents\\GitHub\\nsds\\nodered\\lab\\lab1\\data\\logHttp.txt",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 1020,
+        "y": 440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a566468dfc9f0aab",
+        "type": "debug",
+        "z": "1e27afcb11722f87",
+        "name": "RequestDebug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 880,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "f8ba0e479114c35f",
+        "type": "function",
+        "z": "1e27afcb11722f87",
+        "name": "PollenFilter",
+        "func": "let pollenValue = msg.payload.current;\n\nlet pollenUnits = msg.payload.current_units;\n\nif(pollenValue == undefined || pollenUnits == undefined || pollenValue == null || pollenUnits == null){\n    return null;\n}\n\nconst newPayload = {\n    current: pollenValue,\n    current_units: pollenUnits\n}\n\nconst newMsg = {\n    __msgid__ : msg._msgid,\n    topic: msg.topic,\n    payload : newPayload,\n\n}\n\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 810,
+        "y": 380,
+        "wires": [
+            [
+                "ca242e35d19944b1",
+                "178b27dd98bac1d2"
+            ]
+        ]
+    },
+    {
+        "id": "178b27dd98bac1d2",
+        "type": "debug",
+        "z": "1e27afcb11722f87",
+        "name": "PollenFilterDebug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1050,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "6bf9df623e5391aa",
+        "type": "inject",
+        "z": "a385d51087b49d7d",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "240",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 290,
+        "y": 280,
+        "wires": [
+            [
+                "163799cb66ff7290"
+            ]
+        ]
+    },
+    {
+        "id": "163799cb66ff7290",
+        "type": "file in",
+        "z": "a385d51087b49d7d",
+        "name": "LogData",
+        "filename": "C:\\Users\\marco\\Documents\\GitHub\\nsds\\nodered\\lab\\lab1\\data\\logHttp.txt",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 520,
+        "y": 320,
+        "wires": [
+            [
+                "023fd9d72f101d29"
+            ]
+        ]
+    },
+    {
+        "id": "79c7895886e97206",
+        "type": "debug",
+        "z": "a385d51087b49d7d",
+        "name": "RequestFromFileDebug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1030,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "023fd9d72f101d29",
+        "type": "json",
+        "z": "a385d51087b49d7d",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 750,
+        "y": 320,
+        "wires": [
+            [
+                "79c7895886e97206"
+            ]
+        ]
+    }
+]

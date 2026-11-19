@@ -1,0 +1,10 @@
+{
+    "name": "nsds-nodered-practice",
+    "description": "Isolated Node-RED Practice Workspace for extra NSDS exercises (port 1881)",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+        "node-red-contrib-chatbot": "^2.0.8",
+        "node-red-node-openweathermap": "~1.0.1"
+    }
+}

@@ -32,7 +32,7 @@ nodered/
 │   └── 2.2-Node-RED Networking MQTT.pdf
 ├── notes/
 │   └── NodeRED_Lecture_Notes.md           # Appunti completi e cheatsheet d'esame
-├── lab/                                   # Tracce e soluzioni dei laboratori
+├── lab/                                   # Tracce e soluzioni dei laboratori (+ lab-userdir isolato)
 ├── nodered-lab-template/                  # Template pronti per tutte e 5 le lezioni
 │   ├── README.md                          # Tabella decisionale e guida all'uso
 │   ├── settings.js
@@ -46,10 +46,16 @@ nodered/
 │   └── scripts/
 │       ├── udp-test-client.js             # Client UDP di test (send / listen)
 │       └── mqtt-test-client.js            # Client MQTT di test (pub / sub / sensor)
-└── nodered-exam/                          # Workspace pulito pronto per l'esame
+├── nodered-practice/                      # Workspace isolato per esercizi extra (:1881)
+│   ├── README.md
+│   ├── flows.json
+│   ├── package.json                       # openweathermap + chatbot preinstallati
+│   └── settings.js                        # Porta 1881 + contextStorage (memory + file)
+└── nodered-exam/                          # Workspace pulito dedicato all'esame (:1880)
     ├── README.md
     ├── flows.json
-    └── settings.js                        # Preconfigurato con contextStorage (memory + file)
+    ├── package.json                       # openweathermap + chatbot preinstallati
+    └── settings.js                        # Porta 1880 + contextStorage (memory + file)
 ```
 
 ---
@@ -63,10 +69,13 @@ Dalla cartella `nodered/` (o dalla root del repository):
 # Avvia il workspace pulito per l'esame (http://localhost:1880)
 .\nodered\start-nodered.ps1 -Mode exam
 
-# Oppure avvia Node-RED con tutti i 5 tab dei template delle lezioni
+# Avvia il workspace separato per esercitarsi (http://localhost:1881 — anche in parallelo!)
+.\nodered\start-nodered.ps1 -Mode practice
+
+# Oppure avvia Node-RED con tutti i 5 tab dei template delle lezioni (http://localhost:1880)
 .\nodered\start-nodered.ps1 -Mode templates
 ```
-Modalità supportate per `-Mode`: `exam`, `templates`, `basics`, `functions`, `datasharing`, `udp`, `mqtt`.
+Modalità supportate per `-Mode`: `exam` (`1880`), `practice` (`1881`), `lab1`, `lab2`, `templates`, `basics`, `functions`, `datasharing`, `udp`, `mqtt`.
 Per fermare Node-RED premi **`Ctrl+C`** nel terminale (oppure esegui `.\nodered\stop-nodered.ps1`).
 
 ### 2. Gestire solo il Broker MQTT Mosquitto
@@ -82,13 +91,15 @@ Per fermare Node-RED premi **`Ctrl+C`** nel terminale (oppure esegui `.\nodered\
 
 ### Da IntelliJ IDEA (consigliato — già configurato!)
 1. **Run Configurations pronte in alto a destra**:
-   - **`Node-RED Exam`** — Avvia Mosquitto + Node-RED sul workspace `nodered-exam/` (`http://localhost:1880`).
+   - **`Node-RED Exam`** — Avvia Mosquitto + Node-RED sul workspace isolato `nodered-exam/` (`http://localhost:1880`).
+   - **`Node-RED Practice (Exercises)`** — Avvia Mosquitto + Node-RED sul workspace isolato `nodered-practice/` (`http://localhost:1881`, utilizzabile anche contemporaneamente a `Node-RED Exam`).
+   - **`Node-RED Lab 1`** / **`Node-RED Lab 2`** — Avvia i laboratori nella loro `userDir` separata (`lab/lab-userdir/`).
    - **`Node-RED Templates (All Lectures)`** — Avvia Mosquitto + Node-RED con tutti i 5 flow delle lezioni.
    - **`MQTT Start (WSL2)` / `MQTT Stop (WSL2)`** — Avvia o ferma solo il broker Mosquitto.
    - **`UDP Test Client (Send)` / `MQTT Test Client (Sensor)`** — Esegue gli script Node.js companion direttamente nella console dell'IDE.
 2. **Dalla tool window `npm`** (oppure aprendo [`package.json`](./package.json) e cliccando sull'icona ▶ accanto a `"scripts"`):
-   - `start:exam`, `start:templates`, `start:basics`, `start:functions`, `start:datasharing`, `start:udp`, `start:mqtt`, `test:udp`, `test:mqtt`.
-3. **Aprire l'editor visuale**: una volta avviato Node-RED, apri **`http://localhost:1880`** nel browser (i file `flows.json` nel repo si aggiornano automaticamente ogni volta che premi **Deploy**).
+   - `start:exam`, `start:practice`, `start:lab1`, `start:lab2`, `start:templates`, `start:basics`, `start:functions`, `start:datasharing`, `start:udp`, `start:mqtt`, `test:udp`, `test:mqtt`.
+3. **Aprire l'editor visuale**: una volta avviato Node-RED, apri **`http://localhost:1880`** (Exam / Lab / Templates) oppure **`http://localhost:1881`** (Practice) nel browser (i file `flows.json` nel repo si aggiornano automaticamente ogni volta che premi **Deploy**).
 
 > **Nota per IntelliJ IDEA appena aggiornato**: se il terminale integrato di IntelliJ era già aperto prima dell'installazione di Node.js, riavvia IntelliJ IDEA una volta affinché erediti il nuovo `PATH` di Windows (`node`, `npm`, `node-red`).
 
